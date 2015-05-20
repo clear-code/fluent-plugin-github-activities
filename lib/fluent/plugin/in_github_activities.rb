@@ -64,13 +64,12 @@ module Fluent
 
     def prepare_initial_queues
       @users.each do |user|
-        reserve_user_activities(user)
+        @request_queue.push(user_activities(user))
       end
     end
 
-    def reserve_user_activities(user)
-      endpoint = "#{GITHUB_API_BASE}/users/#{user}/events/public"
-      @request_queue.push(endpoint)
+    def user_activities(user)
+      "#{GITHUB_API_BASE}/users/#{user}/events/public"
     end
   end
 end
