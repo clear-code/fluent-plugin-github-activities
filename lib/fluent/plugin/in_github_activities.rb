@@ -21,14 +21,54 @@ module Fluent
   class GithubActivitiesInput < Input
     Plugin.register_input("github-activities", self)
 
+    config_param :users, :string, :default => nil
+    config_param :users_list, :string, :default => nil
+
     def initialize
       super
+
+      @client = create_client
+      @request_queue = Queue.new
+
+      prepare_users_list
+      prepare_initial_queues
     end
 
     def start
     end
 
     def shutdown
+    end
+
+    private
+    def prepare_users_list
+      @users ||= ""
+      @users = @users.split(",")
+
+      if @users_list
+        users_list = Pathname(@users_list)
+        if users_list.exist?
+          list = users_list.read
+          @users += list.split("\n")
+        end
+      end
+
+      @users = @users.collect do |user|
+        user.strip
+      end.reject do |user|
+        user.empty?
+      end
+    end
+
+    def prepare_initial_queues
+      @users.each do |user|
+        reserve_user_activities(user)
+      end
+    end
+
+    def reserve_user_activities(user)
+      endpoint = "https://api.github.com/users/#{user}/events/public"
+      @request_queue.push(endpoint)
     end
   end
 end
