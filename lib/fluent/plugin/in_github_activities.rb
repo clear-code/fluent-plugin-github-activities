@@ -21,6 +21,8 @@ module Fluent
   class GithubActivitiesInput < Input
     Plugin.register_input("github-activities", self)
 
+    GITHUB_API_BASE = "https://api.github.com"
+
     config_param :users, :string, :default => nil
     config_param :users_list, :string, :default => nil
 
@@ -67,7 +69,7 @@ module Fluent
     end
 
     def reserve_user_activities(user)
-      endpoint = "https://api.github.com/users/#{user}/events/public"
+      endpoint = "#{GITHUB_API_BASE}/users/#{user}/events/public"
       @request_queue.push(endpoint)
     end
   end
