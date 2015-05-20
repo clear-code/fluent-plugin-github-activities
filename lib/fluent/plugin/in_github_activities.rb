@@ -28,6 +28,7 @@ module Fluent
 
     config_param :users, :string, :default => nil
     config_param :users_list, :string, :default => nil
+    config_param :interval, :integer, :default => 1
 
     def initialize
       super
@@ -35,6 +36,7 @@ module Fluent
       require "uri"
       require "net/https"
       require "json"
+      require "thread"
 
       @request_queue = Queue.new
 
@@ -43,8 +45,11 @@ module Fluent
     end
 
     def start
-      @crawler = Crawler.new(:request_queue => @request_queue)
-      @crawler.start
+      @thread = Thread.new do
+        @crawler = Crawler.new(:interval => @interval,
+                               :request_queue => @request_queue)
+        @crawler.start
+      end
     end
 
     def shutdown
@@ -106,6 +111,9 @@ module Fluent
             process_commit(body)
           end
         end
+
+        sleep(@interval)
+        process_request
       end
 
       def request_uri(request)
