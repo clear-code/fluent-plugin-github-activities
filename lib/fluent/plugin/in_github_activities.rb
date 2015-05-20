@@ -114,6 +114,7 @@ module Fluent
 
         sleep(@interval)
         process_request
+        #TODO: if empty, do it with timeout.
       end
 
       def request_uri(request)
