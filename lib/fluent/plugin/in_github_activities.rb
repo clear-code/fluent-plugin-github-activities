@@ -128,6 +128,8 @@ module Fluent
         case event["type"]
         when "PushEvent"
           process_push_event(event)
+        else
+          Engine.emit("#{BASE_TAG}.#{event["type"]}", Engine.now, event)
         end
         @request_queue.push(:type => TYPE_EVENTS,
                             :user => user)
