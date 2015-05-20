@@ -93,22 +93,20 @@ module Fluent
       def process_request
         request = @request_queue.shift
 
-        request_type = request[:type]
-        request_url = URI(request[:url])
-
-        response = Net::HTTP.get_response(request_url)
+        uri = URI(request[:url])
+        response = Net::HTTP.get_response(uri)
 
         case response
         when Net::HTTPSuccess
-          case request_type
+          body = JSON.parse(response.body)
+          case request[:type]
           when TYPE_EVENTS
-            events = JSON.parse(response.body)
+            events = body
             events.each do |event|
               process_event(event)
             end
           when TYPE_COMMIT
-            commit = JSON.parse(response.body)
-            process_commit(commit)
+            process_commit(body)
           end
         end
       end
