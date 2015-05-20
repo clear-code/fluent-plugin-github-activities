@@ -73,12 +73,8 @@ module Fluent
     def prepare_initial_queues
       @users.each do |user|
         @request_queue.push(:type => TYPE_EVENTS,
-                            :url  => user_activities(user))
+                            :user => user)
       end
-    end
-
-    def user_activities(user)
-      "https://api.github.com/users/#{user}/events/public"
     end
 
     class Crawler
@@ -90,10 +86,11 @@ module Fluent
         process_request
       end
 
+      private
       def process_request
         request = @request_queue.shift
 
-        uri = URI(request[:url])
+        uri = request_uri(request)
         response = Net::HTTP.get_response(uri)
 
         case response
@@ -111,6 +108,21 @@ module Fluent
         end
       end
 
+      def request_uri(request)
+        uri = nil
+        case request[:type]
+        when TYPE_EVENTS
+          uri = user_activities(request[:user])
+        else
+          uri = request[:uri]
+        end
+        URI(uri)
+      end
+
+      def user_activities(user)
+        "https://api.github.com/users/#{user}/events/public"
+      end
+
       def process_event(event)
         # see also: https://developer.github.com/v3/activity/events/types/
         case event["type"]
@@ -123,7 +135,7 @@ module Fluent
         payload = event["payload"]
         payload["commits"].each do |commit|
           @request_queue.push(:type => TYPE_COMMIT,
-                              :url  => commit["url"])
+                              :uri  => commit["url"])
         end
         Engine.emit("#{BASE_TAG}.push", Engine.now, event)
       end
