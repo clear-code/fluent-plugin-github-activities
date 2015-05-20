@@ -21,15 +21,22 @@ module Fluent
   class GithubActivitiesInput < Input
     Plugin.register_input("github-activities", self)
 
-    GITHUB_API_BASE = "https://api.github.com"
+    DEFAULT_HOST = "api.github.com"
+    DEFAULT_PORT = 443
+    DEFAULT_USE_SSL = true
 
     config_param :users, :string, :default => nil
     config_param :users_list, :string, :default => nil
+    config_param :host, :string, :default => DEFAULT_HOST
+    config_param :port, :integer, :default => DEFAULT_PORT
+    config_param :use_ssl, :bool, :default => DEFAULT_USE_SSL
 
     def initialize
       super
 
-      @client = create_client
+      require "net/https"
+      require "json"
+
       @request_queue = Queue.new
 
       prepare_users_list
@@ -37,6 +44,11 @@ module Fluent
     end
 
     def start
+      @crawler = Crawler.new(:host => @host,
+                             :port => @port,
+                             :use_ssl => @use_ssl,
+                             :request_queue => @request_queue)
+      @crawler.start
     end
 
     def shutdown
@@ -69,7 +81,39 @@ module Fluent
     end
 
     def user_activities(user)
-      "#{GITHUB_API_BASE}/users/#{user}/events/public"
+      "/users/#{user}/events/public"
+    end
+
+    class Crawler
+      def initialize(params)
+        @host = params[:host]
+        @port = params[:port]
+        @use_ssl = params[:use_ssl]
+        @request_queue = params[:request_queue]
+      end
+
+      def start
+        process_request
+      end
+
+      def process_request
+        path = @request_queue.shift
+        custom_headers = {}
+        request = Net::HTTP::Get.new(path, custom_headers)
+
+        http = Net::HTTP.new(@host, @port)
+        http.use_ssl = @use_ssl
+        http.start do
+          http.request(request) do |response|
+            process_response(response)
+          end
+        end
+      end
+
+      def process_response(response)
+        events = JSON.parse(response.body)
+        # puts events
+      end
     end
   end
 end
