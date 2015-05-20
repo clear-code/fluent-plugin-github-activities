@@ -100,7 +100,7 @@ module Fluent
           when TYPE_EVENTS
             events = body
             events.each do |event|
-              process_event(event)
+              process_user_event(request[:user], event)
             end
           when TYPE_COMMIT
             process_commit(body)
@@ -123,12 +123,14 @@ module Fluent
         "https://api.github.com/users/#{user}/events/public"
       end
 
-      def process_event(event)
+      def process_user_event(user, event)
         # see also: https://developer.github.com/v3/activity/events/types/
         case event["type"]
         when "PushEvent"
           process_push_event(event)
         end
+        @request_queue.push(:type => TYPE_EVENTS,
+                            :user => user)
       end
 
       def process_push_event(event)
