@@ -22,7 +22,13 @@ require "fluent/plugin/github-activities"
 class CrawlerTest < Test::Unit::TestCase
   def setup
     @request_queue = []
+    @emitted_records = []
+
     @crawler = ::Fluent::GithubActivities::Crawler.new(:request_queue => @request_queue)
+    @crawler.on_emit = lambda do |tag, record|
+      @emitted_records << { :tag    => tag,
+                            :record => record }
+    end
   end
 
   data(
@@ -35,5 +41,40 @@ class CrawlerTest < Test::Unit::TestCase
   def test_request_uri(data)
     uri = @crawler.request_uri(data[:request])
     assert_equal(URI(data[:uri]), uri)
+  end
+
+  class UserEventTest < self
+    def test_generic
+      @crawler.process_user_event("username", { "type" => "test" })
+      expected = {
+        :request_queue => [],
+        :emitted_records => [
+          { :tag    => "test",
+            :record => { "type" => "test" } },
+        ],
+      }
+      assert_equal(expected,
+                   { :request_queue   => @request_queue,
+                     :emitted_records => @emitted_records })
+    end
+  end
+
+  class UserEventsTest < self
+    def test_generic
+      @crawler.process_user_events("username", [{ "type" => "test" }])
+      expected = {
+        :request_queue => [
+          { :type => ::Fluent::GithubActivities::TYPE_EVENTS,
+            :user => "username" },
+        ],
+        :emitted_records => [
+          { :tag    => "test",
+            :record => { "type" => "test" } },
+        ],
+      }
+      assert_equal(expected,
+                   { :request_queue   => @request_queue,
+                     :emitted_records => @emitted_records })
+    end
   end
 end
