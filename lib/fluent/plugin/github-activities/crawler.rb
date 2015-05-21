@@ -62,6 +62,13 @@ module Fluent
           when TYPE_COMMIT
             process_commit(body)
           end
+        when Net::HTTPNotModified
+          case request[:type]
+          when TYPE_EVENTS
+            reserve_user_events(request[:user],
+                                :previous_response => response,
+                                :previous_entity_tag => extra_headers["If-None-Match"])
+          end
         end
         true
       end
@@ -95,7 +102,8 @@ module Fluent
           now = options[:now] || Time.now
           interval = response["X-Poll-Interval"].to_i
           time_to_process = now.to_i + interval
-          request[:previous_entity_tag] = response["ETag"]
+          request[:previous_entity_tag] = response["ETag"] ||
+                                            options[:previous_entity_tag]
           request[:process_after] = time_to_process
         end
         @request_queue.push(request)
