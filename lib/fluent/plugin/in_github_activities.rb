@@ -35,7 +35,7 @@ module Fluent
 
     def start
       @thread = Thread.new do
-        @crawler = ::Fluent::GithubActivities::Crawler.new(:request_queue => @request_queue)
+        @crawler = ::Fluent::GithubActivities::Crawler.new
         @crawler.on_emit = lambda do |tag, record|
           Engine.emit("#{::Fluent::GithubActivities::BASE_TAG}.#{tag}", Engine.now, record)
         end
