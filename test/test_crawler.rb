@@ -82,9 +82,9 @@ class CrawlerTest < Test::Unit::TestCase
 
   class PushEventTest < self
     def test_multiple_commits
-      push_event = JSON.parse(fixture_data("push-event-multiple-commits.json"))
+      event = JSON.parse(fixture_data("push-event-multiple-commits.json"))
       base = "https://api.github.com/repos/clear-code/fluent-plugin-github-activities/commits"
-      @crawler.process_push_event(push_event)
+      @crawler.process_user_event("user", event)
       expected = {
         :request_queue => [
           { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
