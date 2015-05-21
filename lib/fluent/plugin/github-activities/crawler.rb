@@ -24,6 +24,9 @@ require "json"
 module Fluent
   module GithubActivities
     class Crawler
+      class EmptyRequestQueue < StandardError
+      end
+
       attr_writer :on_emit
       attr_reader :request_queue
 
@@ -32,11 +35,13 @@ module Fluent
       end
 
       def process_request
+        raise EmptyRequestQueue.new if request.empty?
+
         request = @request_queue.shift
         if request[:process_after] and
              Time.now.to_i < request[:process_after]
           @request_queue.push(request)
-          return
+          return false
         end
 
         uri = request_uri(request)
@@ -58,6 +63,7 @@ module Fluent
             process_commit(body)
           end
         end
+        true
       end
 
       def request_uri(request)
