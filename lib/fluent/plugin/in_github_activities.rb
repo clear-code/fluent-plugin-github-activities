@@ -19,10 +19,13 @@
 
 module Fluent
   class GithubActivitiesInput < Input
+    DEFAULT_BASE_TAG = "github-activity"
+
     Plugin.register_input("github-activities", self)
 
     config_param :users, :string, :default => nil
     config_param :users_list, :string, :default => nil
+    config_param :base_tag, :string, :default => DEFAULT_BASE_TAG
     config_param :interval, :integer, :default => 1
 
     def initialize
@@ -37,7 +40,7 @@ module Fluent
       @thread = Thread.new do
         @crawler = ::Fluent::GithubActivities::Crawler.new
         @crawler.on_emit = lambda do |tag, record|
-          Engine.emit("#{::Fluent::GithubActivities::BASE_TAG}.#{tag}", Engine.now, record)
+          Engine.emit("#{@base_tag}.#{tag}", Engine.now, record)
         end
 
         users = prepare_users_list

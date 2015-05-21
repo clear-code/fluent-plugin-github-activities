@@ -21,8 +21,6 @@ require "fluent/plugin/github-activities/crawler"
 
 module Fluent
   module GithubActivities
-    BASE_TAG = "github-activity"
-
     TYPE_EVENTS = :events
     TYPE_COMMIT = :commit
   end
