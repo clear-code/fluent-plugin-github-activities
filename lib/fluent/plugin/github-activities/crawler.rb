@@ -79,6 +79,10 @@ module Fluent
           process_push_event(event)
         when "CommitCommentEvent"
           emit("commit-comment", event)
+        when "IssuesEvent"
+          emit("issues", event)
+        when "IssueCommentEvent"
+          emit("issue-comment", event)
         else
           emit(event["type"], event)
         end
