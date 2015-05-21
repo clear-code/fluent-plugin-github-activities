@@ -65,10 +65,7 @@ class CrawlerTest < Test::Unit::TestCase
     def test_generic
       @crawler.process_user_events("username", [{ "type" => "test" }])
       expected = {
-        :request_queue => [
-          { :type => ::Fluent::GithubActivities::TYPE_EVENTS,
-            :user => "username" },
-        ],
+        :request_queue => [],
         :emitted_records => [
           { :tag    => "test",
             :record => { "type" => "test" } },

@@ -32,9 +32,18 @@ module Fluent
 
       def process_request
         request = @request_queue.shift
+        if request[:process_after] and
+             Time.now.to_i < request[:process_after]
+          @request_queue.push(request)
+          return
+        end
 
         uri = request_uri(request)
-        response = Net::HTTP.get_response(uri)
+        extra_headers = extra_request_headers(request)
+
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = uri.is_a?(URI::HTTPS)
+        response = http.get(uri.path, extra_headers)
 
         case response
         when Net::HTTPSuccess
@@ -43,6 +52,7 @@ module Fluent
           when TYPE_EVENTS
             events = body
             process_user_events(request[:user], events)
+            reserve_user_events(request[:user], :previous_response => response)
           when TYPE_COMMIT
             process_commit(body)
           end
@@ -60,16 +70,33 @@ module Fluent
         URI(uri)
       end
 
-      def user_activities(user)
-        "https://api.github.com/users/#{user}/events/public"
+      def extra_request_headers(request)
+        headers = {}
+        if request[:if_none_match]
+          headers["If-None-Match"] = request[:if_none_match]
+        end
+        headers
+      end
+
+      def reserve_user_events(user, options={})
+        request = {
+          :type => TYPE_EVENTS,
+          :user => params[:user],
+        }
+        response = options[:previous_response]
+        if response
+          interval = response["X-Poll-Interval"].to_i
+          time_to_process = Time.now.to_i + interval
+          request[:if_none_match] = response["ETag"]
+          request[:process_after] = time_to_process
+        end
+        @request_queue.push(request)
       end
 
       def process_user_events(user, events)
         events.each do |event|
           process_user_event(user, event)
         end
-        @request_queue.push(:type => TYPE_EVENTS,
-                            :user => user)
       end
 
       def process_user_event(user, event)
@@ -106,6 +133,10 @@ module Fluent
       end
 
       private
+      def user_activities(user)
+        "https://api.github.com/users/#{user}/events/public"
+      end
+
       def emit(tag, record)
         @on_emit.call(tag, record) if @on_emit
       end
