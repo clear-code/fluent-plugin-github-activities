@@ -21,11 +21,6 @@ module Fluent
   class GithubActivitiesInput < Input
     Plugin.register_input("github-activities", self)
 
-    BASE_TAG = "github-activity"
-
-    TYPE_EVENTS = :events
-    TYPE_COMMIT = :commit
-
     config_param :users, :string, :default => nil
     config_param :users_list, :string, :default => nil
     config_param :interval, :integer, :default => 1
@@ -33,10 +28,9 @@ module Fluent
     def initialize
       super
 
-      require "uri"
-      require "net/https"
-      require "json"
       require "thread"
+      require "pathname"
+      require "fluent/plugin/github-activities"
 
       @request_queue = Queue.new
 
@@ -46,9 +40,9 @@ module Fluent
 
     def start
       @thread = Thread.new do
-        @crawler = Crawler.new(:request_queue => @request_queue)
+        @crawler = ::Fluent::GithubActivities::Crawler.new(:request_queue => @request_queue)
         @crawler.on_emit = lambda do |tag, record|
-          Engine.emit("#{BASE_TAG}.#{tag}", Engine.now, record)
+          Engine.emit("#{::Fluent::GithubActivities::BASE_TAG}.#{tag}", Engine.now, record)
         end
         loop do
           @crawler.process_request
@@ -82,82 +76,8 @@ module Fluent
 
     def prepare_initial_queues
       @users.each do |user|
-        @request_queue.push(:type => TYPE_EVENTS,
+        @request_queue.push(:type => ::Fluent::GithubActivities::TYPE_EVENTS,
                             :user => user)
-      end
-    end
-
-    class Crawler
-      attr_writer :on_emit
-
-      def initialize(params)
-        @request_queue = params[:request_queue]
-      end
-
-      def process_request
-        request = @request_queue.shift
-
-        uri = request_uri(request)
-        response = Net::HTTP.get_response(uri)
-
-        case response
-        when Net::HTTPSuccess
-          body = JSON.parse(response.body)
-          case request[:type]
-          when TYPE_EVENTS
-            events = body
-            events.each do |event|
-              process_user_event(request[:user], event)
-            end
-          when TYPE_COMMIT
-            process_commit(body)
-          end
-        end
-      end
-
-      private
-      def request_uri(request)
-        uri = nil
-        case request[:type]
-        when TYPE_EVENTS
-          uri = user_activities(request[:user])
-        else
-          uri = request[:uri]
-        end
-        URI(uri)
-      end
-
-      def user_activities(user)
-        "https://api.github.com/users/#{user}/events/public"
-      end
-
-      def process_user_event(user, event)
-        # see also: https://developer.github.com/v3/activity/events/types/
-        case event["type"]
-        when "PushEvent"
-          process_push_event(event)
-        else
-          emit(event["type"], event)
-        end
-        @request_queue.push(:type => TYPE_EVENTS,
-                            :user => user)
-      end
-
-      def process_push_event(event)
-        payload = event["payload"]
-        payload["commits"].each do |commit|
-          @request_queue.push(:type => TYPE_COMMIT,
-                              :uri  => commit["url"])
-        end
-        emit("push", event)
-      end
-
-      def process_commit(commit)
-        emit("commit", commit)
-      end
-
-      def emit(tag, record)
-        @on_emit.call(tag, record) if @on_emit
       end
     end
   end
