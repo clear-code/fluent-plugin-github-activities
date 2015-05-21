@@ -109,6 +109,40 @@ class CrawlerTest < Test::Unit::TestCase
     end
   end
 
+  class IssuesEventTest < self
+    def test_multiple_commits
+      event = JSON.parse(fixture_data("issues-event.json"))
+      @crawler.process_user_event("user", event)
+      expected = {
+        :request_queue => [],
+        :emitted_records => [
+          { :tag    => "issues",
+            :record => event }
+        ],
+      }
+      assert_equal(expected,
+                   { :request_queue   => @request_queue,
+                     :emitted_records => @emitted_records })
+    end
+  end
+
+  class IssueCommentEventTest < self
+    def test_multiple_commits
+      event = JSON.parse(fixture_data("issue-comment-event.json"))
+      @crawler.process_user_event("user", event)
+      expected = {
+        :request_queue => [],
+        :emitted_records => [
+          { :tag    => "issue-comment",
+            :record => event }
+        ],
+      }
+      assert_equal(expected,
+                   { :request_queue   => @request_queue,
+                     :emitted_records => @emitted_records })
+    end
+  end
+
   class CommitCommentEventTest < self
     def test_multiple_commits
       event = JSON.parse(fixture_data("commit-comment-event.json"))
