@@ -86,8 +86,9 @@ module Fluent
         }
         response = options[:previous_response]
         if response
+          now = options[:now] || Time.now
           interval = response["X-Poll-Interval"].to_i
-          time_to_process = Time.now.to_i + interval
+          time_to_process = now.to_i + interval
           request[:if_none_match] = response["ETag"]
           request[:process_after] = time_to_process
         end
