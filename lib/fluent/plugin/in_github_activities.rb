@@ -31,11 +31,6 @@ module Fluent
       require "thread"
       require "pathname"
       require "fluent/plugin/github-activities"
-
-      @request_queue = Queue.new
-
-      prepare_users_list
-      prepare_initial_queues
     end
 
     def start
@@ -44,6 +39,12 @@ module Fluent
         @crawler.on_emit = lambda do |tag, record|
           Engine.emit("#{::Fluent::GithubActivities::BASE_TAG}.#{tag}", Engine.now, record)
         end
+
+        users = prepare_users_list
+        users.each do |user|
+          @crawler.reserve_user_events(user)
+        end
+
         loop do
           @crawler.process_request
           sleep(@interval)
@@ -57,28 +58,23 @@ module Fluent
     private
     def prepare_users_list
       @users ||= ""
-      @users = @users.split(",")
+      users = @users.split(",")
 
       if @users_list
         users_list = Pathname(@users_list)
         if users_list.exist?
           list = users_list.read
-          @users += list.split("\n")
+          users += list.split("\n")
         end
       end
 
-      @users = @users.collect do |user|
+      users = users.collect do |user|
         user.strip
       end.reject do |user|
         user.empty?
       end
-    end
 
-    def prepare_initial_queues
-      @users.each do |user|
-        @request_queue.push(:type => ::Fluent::GithubActivities::TYPE_EVENTS,
-                            :user => user)
-      end
+      users
     end
   end
 end
