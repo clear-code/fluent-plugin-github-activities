@@ -1,5 +1,4 @@
-#!/usr/bin/env ruby
-# -*- mode: ruby; coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # This file is part of fluent-plugin-github-activities.
 #
@@ -18,18 +17,16 @@
 # License along with fluent-plugin-github-activities.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-base_dir = File.expand_path(File.join(File.dirname(__FILE__), ".."))
-lib_dir = File.join(base_dir, "lib")
-test_dir = File.join(base_dir, "test")
+module Fixture
+  def fixture_directory
+    File.join(File.dirname(__FILE__), "fixture")
+  end
 
-require "test-unit"
-require "test/unit/notify"
+  def fixture_path(*path_components)
+    File.join(fixture_directory, *path_components)
+  end
 
-$LOAD_PATH.unshift(lib_dir)
-
-require_relative "fixture"
-class Test::Unit::TestCase
-  include ::Fixture
+  def fixture_data(*path_components)
+    File.read(fixture_path(*path_components))
+  end
 end
-
-exit(Test::Unit::AutoRunner.run(true, test_dir))
