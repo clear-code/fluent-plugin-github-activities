@@ -46,9 +46,11 @@ module Fluent
 
     def start
       @thread = Thread.new do
-        @crawler = Crawler.new(:interval => @interval,
-                               :request_queue => @request_queue)
-        @crawler.start
+        loop do
+          @crawler = Crawler.new(:request_queue => @request_queue)
+          @crawler.process_request
+          sleep(@interval)
+        end
       end
     end
 
@@ -87,18 +89,7 @@ module Fluent
         @request_queue = params[:request_queue]
       end
 
-      def start
-        process_request
-      end
-
-      private
       def process_request
-        if @request_queue.empty?
-          sleep(@interval)
-          process_request
-          return
-        end
-
         request = @request_queue.shift
 
         uri = request_uri(request)
@@ -117,11 +108,9 @@ module Fluent
             process_commit(body)
           end
         end
-
-        sleep(@interval)
-        process_request
       end
 
+      private
       def request_uri(request)
         uri = nil
         case request[:type]
