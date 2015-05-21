@@ -32,16 +32,67 @@ class CrawlerTest < Test::Unit::TestCase
     end
   end
 
-  data(
+  REQUEST_PATTERNS = {
     :user_events => {
-      :request => { :type => ::Fluent::GithubActivities::TYPE_EVENTS,
+      :request => { :type => :events,
                     :user => "username" },
-      :uri => "https://api.github.com/users/username/events/public",
+      :uri     => "https://api.github.com/users/username/events/public",
+      :headers => {},
     },
-  )
+    :user_events_with_previous_request => {
+      :request => { :type => :events,
+                    :user => "username",
+                    :if_none_match => "aaaaa",
+                    :process_after => 29 },
+      :uri     => "https://api.github.com/users/username/events/public",
+      :headers => {
+        "If-None-Match" => "aaaaa",
+      },
+    },
+  }
+
+  data(REQUEST_PATTERNS)
   def test_request_uri(data)
     uri = @crawler.request_uri(data[:request])
     assert_equal(URI(data[:uri]), uri)
+  end
+
+  data(REQUEST_PATTERNS)
+  def extra_request_headers(data)
+    headers = @crawler.extra_request_headers(data[:request])
+    assert_equal(data[:headers], headers)
+  end
+
+  class ReserveUserEventsTest < self
+    def test_without_previous_response
+      now = Time.now
+      @crawler.reserve_user_events("username",
+                                   :now => now)
+      expected_request = {
+        :type => :events,
+        :user => "username",
+      }
+      assert_equal([expected_request],
+                   @crawler.request_queue)
+    end
+
+    def test_with_previous_response
+      now = Time.now
+      @crawler.reserve_user_events("username",
+                                   :now => now,
+                                   :previous_response => {
+                                     "ETag" => "aaaaa",
+                                     "X-Poll-Interval" => 60,
+                                   })
+      expected_request = {
+        :type => :events,
+        :user => "username",
+        :if_none_match => "aaaaa",
+        :process_after => now.to_i + 60,
+      }
+      assert_equal([expected_request],
+                   @crawler.request_queue)
+    end
   end
 
   class UserEventTest < self
