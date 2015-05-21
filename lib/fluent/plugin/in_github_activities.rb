@@ -56,6 +56,7 @@ module Fluent
     end
 
     def shutdown
+      @thread.exit
     end
 
     private
