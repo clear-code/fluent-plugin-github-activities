@@ -27,7 +27,7 @@ module Fluent
       attr_writer :on_emit
       attr_reader :request_queue
 
-      def initialize(options)
+      def initialize(options={})
         @request_queue = options[:request_queue] || []
       end
 
