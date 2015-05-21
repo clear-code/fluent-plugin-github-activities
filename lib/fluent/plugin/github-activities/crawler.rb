@@ -35,7 +35,7 @@ module Fluent
       end
 
       def process_request
-        raise EmptyRequestQueue.new if request.empty?
+        raise EmptyRequestQueue.new if @request_queue.empty?
 
         request = @request_queue.shift
         if request[:process_after] and
