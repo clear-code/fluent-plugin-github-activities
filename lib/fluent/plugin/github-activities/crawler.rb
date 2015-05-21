@@ -77,6 +77,8 @@ module Fluent
         case event["type"]
         when "PushEvent"
           process_push_event(event)
+        when "CommitCommentEvent"
+          emit("commit-comment", event)
         else
           emit(event["type"], event)
         end
