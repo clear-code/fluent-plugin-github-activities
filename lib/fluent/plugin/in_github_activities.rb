@@ -47,6 +47,9 @@ module Fluent
     def start
       @thread = Thread.new do
         @crawler = Crawler.new(:request_queue => @request_queue)
+        @crawler.on_emit = lambda do |tag, record|
+          Engine.emit("#{BASE_TAG}.#{tag}", Engine.now, record)
+        end
         loop do
           @crawler.process_request
           sleep(@interval)
@@ -85,6 +88,8 @@ module Fluent
     end
 
     class Crawler
+      attr_writer :on_emit
+
       def initialize(params)
         @request_queue = params[:request_queue]
       end
@@ -132,7 +137,7 @@ module Fluent
         when "PushEvent"
           process_push_event(event)
         else
-          Engine.emit("#{BASE_TAG}.#{event["type"]}", Engine.now, event)
+          emit(event["type"], event)
         end
         @request_queue.push(:type => TYPE_EVENTS,
                             :user => user)
@@ -144,11 +149,15 @@ module Fluent
           @request_queue.push(:type => TYPE_COMMIT,
                               :uri  => commit["url"])
         end
-        Engine.emit("#{BASE_TAG}.push", Engine.now, event)
+        emit("push", event)
       end
 
       def process_commit(commit)
-        Engine.emit("#{BASE_TAG}.commit", Engine.now, commit)
+        emit("commit", commit)
+      end
+
+      def emit(tag, record)
+        @on_emit.call(tag, record) if @on_emit
       end
     end
   end
