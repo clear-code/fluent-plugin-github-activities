@@ -108,4 +108,21 @@ class CrawlerTest < Test::Unit::TestCase
                      :emitted_records => @emitted_records })
     end
   end
+
+  class CommitTest < self
+    def test_multiple_commits
+      commit = JSON.parse(fixture_data("commit.json"))
+      @crawler.process_commit(commit)
+      expected = {
+        :request_queue => [],
+        :emitted_records => [
+          { :tag    => "commit",
+            :record => commit }
+        ],
+      }
+      assert_equal(expected,
+                   { :request_queue   => @request_queue,
+                     :emitted_records => @emitted_records })
+    end
+  end
 end

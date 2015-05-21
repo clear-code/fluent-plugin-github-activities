@@ -1,0 +1,89 @@
+{
+  "sha": "8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+  "commit": {
+    "author": {
+      "name": "YUKI Hiroshi",
+      "email": "shimoda@clear-code.com",
+      "date": "2015-05-21T05:14:56Z"
+    },
+    "committer": {
+      "name": "YUKI Hiroshi",
+      "email": "shimoda@clear-code.com",
+      "date": "2015-05-21T05:14:56Z"
+    },
+    "message": "Add missing constant",
+    "tree": {
+      "sha": "ee67d534dd9d4baba9438f046220d7ea70bf9b0f",
+      "url": "https://api.github.com/repos/clear-code/fluent-plugin-github-activities/git/trees/ee67d534dd9d4baba9438f046220d7ea70bf9b0f"
+    },
+    "url": "https://api.github.com/repos/clear-code/fluent-plugin-github-activities/git/commits/8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+    "comment_count": 0
+  },
+  "url": "https://api.github.com/repos/clear-code/fluent-plugin-github-activities/commits/8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+  "html_url": "https://github.com/clear-code/fluent-plugin-github-activities/commit/8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+  "comments_url": "https://api.github.com/repos/clear-code/fluent-plugin-github-activities/commits/8e90721ff5d89f52b5b3adf0b86db01f03dc5588/comments",
+  "author": {
+    "login": "piroor",
+    "id": 70062,
+    "avatar_url": "https://avatars.githubusercontent.com/u/70062?v=3",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/piroor",
+    "html_url": "https://github.com/piroor",
+    "followers_url": "https://api.github.com/users/piroor/followers",
+    "following_url": "https://api.github.com/users/piroor/following{/other_user}",
+    "gists_url": "https://api.github.com/users/piroor/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/piroor/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/piroor/subscriptions",
+    "organizations_url": "https://api.github.com/users/piroor/orgs",
+    "repos_url": "https://api.github.com/users/piroor/repos",
+    "events_url": "https://api.github.com/users/piroor/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/piroor/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "piroor",
+    "id": 70062,
+    "avatar_url": "https://avatars.githubusercontent.com/u/70062?v=3",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/piroor",
+    "html_url": "https://github.com/piroor",
+    "followers_url": "https://api.github.com/users/piroor/followers",
+    "following_url": "https://api.github.com/users/piroor/following{/other_user}",
+    "gists_url": "https://api.github.com/users/piroor/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/piroor/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/piroor/subscriptions",
+    "organizations_url": "https://api.github.com/users/piroor/orgs",
+    "repos_url": "https://api.github.com/users/piroor/repos",
+    "events_url": "https://api.github.com/users/piroor/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/piroor/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "e77acc068b5568f8ea55605db2e3a9005805c898",
+      "url": "https://api.github.com/repos/clear-code/fluent-plugin-github-activities/commits/e77acc068b5568f8ea55605db2e3a9005805c898",
+      "html_url": "https://github.com/clear-code/fluent-plugin-github-activities/commit/e77acc068b5568f8ea55605db2e3a9005805c898"
+    }
+  ],
+  "stats": {
+    "total": 2,
+    "additions": 2,
+    "deletions": 0
+  },
+  "files": [
+    {
+      "sha": "cf54be996c731d5a8223934eecaac9d7cba2687e",
+      "filename": "lib/fluent/plugin/github-activities.rb",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 0,
+      "changes": 2,
+      "blob_url": "https://github.com/clear-code/fluent-plugin-github-activities/blob/8e90721ff5d89f52b5b3adf0b86db01f03dc5588/lib/fluent/plugin/github-activities.rb",
+      "raw_url": "https://github.com/clear-code/fluent-plugin-github-activities/raw/8e90721ff5d89f52b5b3adf0b86db01f03dc5588/lib/fluent/plugin/github-activities.rb",
+      "contents_url": "https://api.github.com/repos/clear-code/fluent-plugin-github-activities/contents/lib/fluent/plugin/github-activities.rb?ref=8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+      "patch": "@@ -21,6 +21,8 @@\n \n module Fluent\n   module GithubActivities\n+    BASE_TAG = \"github-activity\"\n+\n     TYPE_EVENTS = :events\n     TYPE_COMMIT = :commit\n   end"
+    }
+  ]
+}
