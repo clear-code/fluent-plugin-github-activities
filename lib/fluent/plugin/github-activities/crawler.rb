@@ -85,6 +85,8 @@ module Fluent
           emit("issue-comment", event)
         when "ForkEvent"
           emit("fork", event)
+        when "PullRequestEvent"
+          emit("pull-request", event)
         else
           emit(event["type"], event)
         end

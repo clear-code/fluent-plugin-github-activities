@@ -177,6 +177,23 @@ class CrawlerTest < Test::Unit::TestCase
     end
   end
 
+  class PullRequestEventTest < self
+    def test_multiple_commits
+      event = JSON.parse(fixture_data("pull-request-event.json"))
+      @crawler.process_user_event("user", event)
+      expected = {
+        :request_queue => [],
+        :emitted_records => [
+          { :tag    => "pull-request",
+            :record => event }
+        ],
+      }
+      assert_equal(expected,
+                   { :request_queue   => @request_queue,
+                     :emitted_records => @emitted_records })
+    end
+  end
+
   class CommitTest < self
     def test_multiple_commits
       commit = JSON.parse(fixture_data("commit.json"))
