@@ -93,6 +93,12 @@ module Fluent
 
       private
       def process_request
+        if @request_queue.empty?
+          sleep(@interval)
+          process_request
+          return
+        end
+
         request = @request_queue.shift
 
         uri = request_uri(request)
@@ -114,7 +120,6 @@ module Fluent
 
         sleep(@interval)
         process_request
-        #TODO: if empty, do it with timeout.
       end
 
       def request_uri(request)
