@@ -82,7 +82,7 @@ module Fluent
       def reserve_user_events(user, options={})
         request = {
           :type => TYPE_EVENTS,
-          :user => params[:user],
+          :user => user,
         }
         response = options[:previous_response]
         if response
