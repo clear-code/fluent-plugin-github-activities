@@ -25,9 +25,10 @@ module Fluent
   module GithubActivities
     class Crawler
       attr_writer :on_emit
+      attr_reader :request_queue
 
-      def initialize(params)
-        @request_queue = params[:request_queue]
+      def initialize(options)
+        @request_queue = options[:request_queue] || []
       end
 
       def process_request
