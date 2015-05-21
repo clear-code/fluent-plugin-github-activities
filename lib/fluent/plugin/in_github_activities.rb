@@ -46,8 +46,8 @@ module Fluent
 
     def start
       @thread = Thread.new do
+        @crawler = Crawler.new(:request_queue => @request_queue)
         loop do
-          @crawler = Crawler.new(:request_queue => @request_queue)
           @crawler.process_request
           sleep(@interval)
         end
