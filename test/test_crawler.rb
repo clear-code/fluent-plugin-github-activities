@@ -160,6 +160,23 @@ class CrawlerTest < Test::Unit::TestCase
     end
   end
 
+  class ForkEventTest < self
+    def test_multiple_commits
+      event = JSON.parse(fixture_data("fork-event.json"))
+      @crawler.process_user_event("user", event)
+      expected = {
+        :request_queue => [],
+        :emitted_records => [
+          { :tag    => "fork",
+            :record => event }
+        ],
+      }
+      assert_equal(expected,
+                   { :request_queue   => @request_queue,
+                     :emitted_records => @emitted_records })
+    end
+  end
+
   class CommitTest < self
     def test_multiple_commits
       commit = JSON.parse(fixture_data("commit.json"))

@@ -83,6 +83,8 @@ module Fluent
           emit("issues", event)
         when "IssueCommentEvent"
           emit("issue-comment", event)
+        when "ForkEvent"
+          emit("fork", event)
         else
           emit(event["type"], event)
         end
