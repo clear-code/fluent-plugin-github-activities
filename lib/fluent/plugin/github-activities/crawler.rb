@@ -51,7 +51,6 @@ module Fluent
         end
       end
 
-      private
       def request_uri(request)
         uri = nil
         case request[:type]
@@ -92,6 +91,7 @@ module Fluent
         emit("commit", commit)
       end
 
+      private
       def emit(tag, record)
         @on_emit.call(tag, record) if @on_emit
       end
