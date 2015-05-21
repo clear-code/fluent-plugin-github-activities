@@ -42,9 +42,7 @@ module Fluent
           case request[:type]
           when TYPE_EVENTS
             events = body
-            events.each do |event|
-              process_user_event(request[:user], event)
-            end
+            process_user_events(request[:user], events)
           when TYPE_COMMIT
             process_commit(body)
           end
@@ -66,6 +64,14 @@ module Fluent
         "https://api.github.com/users/#{user}/events/public"
       end
 
+      def process_user_events(user, events)
+        events.each do |event|
+          process_user_event(user, event)
+        end
+        @request_queue.push(:type => TYPE_EVENTS,
+                            :user => user)
+      end
+
       def process_user_event(user, event)
         # see also: https://developer.github.com/v3/activity/events/types/
         case event["type"]
@@ -74,8 +80,6 @@ module Fluent
         else
           emit(event["type"], event)
         end
-        @request_queue.push(:type => TYPE_EVENTS,
-                            :user => user)
       end
 
       def process_push_event(event)
