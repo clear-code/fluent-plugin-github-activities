@@ -100,7 +100,7 @@ class CrawlerTest < Test::Unit::TestCase
         ],
         :emitted_records => [
           { :tag    => "push",
-            :record => push_event }
+            :record => event }
         ],
       }
       assert_equal(expected,
