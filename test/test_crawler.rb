@@ -23,10 +23,9 @@ require "fluent/plugin/github-activities"
 
 class CrawlerTest < Test::Unit::TestCase
   def setup
-    @request_queue = []
     @emitted_records = []
 
-    @crawler = ::Fluent::GithubActivities::Crawler.new(:request_queue => @request_queue)
+    @crawler = ::Fluent::GithubActivities::Crawler.new
     @crawler.on_emit = lambda do |tag, record|
       @emitted_records << { :tag    => tag,
                             :record => record }
@@ -56,7 +55,7 @@ class CrawlerTest < Test::Unit::TestCase
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @request_queue,
+                   { :request_queue   => @crawler.request_queue,
                      :emitted_records => @emitted_records })
     end
   end
@@ -72,7 +71,7 @@ class CrawlerTest < Test::Unit::TestCase
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @request_queue,
+                   { :request_queue   => @crawler.request_queue,
                      :emitted_records => @emitted_records })
     end
   end
@@ -101,7 +100,7 @@ class CrawlerTest < Test::Unit::TestCase
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @request_queue,
+                   { :request_queue   => @crawler.request_queue,
                      :emitted_records => @emitted_records })
     end
   end
@@ -118,7 +117,7 @@ class CrawlerTest < Test::Unit::TestCase
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @request_queue,
+                   { :request_queue   => @crawler.request_queue,
                      :emitted_records => @emitted_records })
     end
   end
@@ -135,7 +134,7 @@ class CrawlerTest < Test::Unit::TestCase
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @request_queue,
+                   { :request_queue   => @crawler.request_queue,
                      :emitted_records => @emitted_records })
     end
   end
@@ -152,7 +151,7 @@ class CrawlerTest < Test::Unit::TestCase
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @request_queue,
+                   { :request_queue   => @crawler.request_queue,
                      :emitted_records => @emitted_records })
     end
   end
@@ -169,7 +168,7 @@ class CrawlerTest < Test::Unit::TestCase
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @request_queue,
+                   { :request_queue   => @crawler.request_queue,
                      :emitted_records => @emitted_records })
     end
   end
@@ -186,7 +185,7 @@ class CrawlerTest < Test::Unit::TestCase
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @request_queue,
+                   { :request_queue   => @crawler.request_queue,
                      :emitted_records => @emitted_records })
     end
   end
@@ -203,7 +202,7 @@ class CrawlerTest < Test::Unit::TestCase
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @request_queue,
+                   { :request_queue   => @crawler.request_queue,
                      :emitted_records => @emitted_records })
     end
   end
