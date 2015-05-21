@@ -79,8 +79,8 @@ module Fluent
 
       def extra_request_headers(request)
         headers = {}
-        if request[:if_none_match]
-          headers["If-None-Match"] = request[:if_none_match]
+        if request[:previous_entity_tag]
+          headers["If-None-Match"] = request[:previous_entity_tag]
         end
         headers
       end
@@ -95,7 +95,7 @@ module Fluent
           now = options[:now] || Time.now
           interval = response["X-Poll-Interval"].to_i
           time_to_process = now.to_i + interval
-          request[:if_none_match] = response["ETag"]
+          request[:previous_entity_tag] = response["ETag"]
           request[:process_after] = time_to_process
         end
         @request_queue.push(request)

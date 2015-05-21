@@ -42,7 +42,7 @@ class CrawlerTest < Test::Unit::TestCase
     :user_events_with_previous_request => {
       :request => { :type => :events,
                     :user => "username",
-                    :if_none_match => "aaaaa",
+                    :previous_entity_tag => "aaaaa",
                     :process_after => 29 },
       :uri     => "https://api.github.com/users/username/events/public",
       :headers => {
@@ -87,7 +87,7 @@ class CrawlerTest < Test::Unit::TestCase
       expected_request = {
         :type => :events,
         :user => "username",
-        :if_none_match => "aaaaa",
+        :previous_entity_tag => "aaaaa",
         :process_after => now.to_i + 60,
       }
       assert_equal([expected_request],
