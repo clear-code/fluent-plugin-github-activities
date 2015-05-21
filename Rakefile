@@ -18,6 +18,7 @@
 # <http://www.gnu.org/licenses/>.
 
 require "bundler/gem_helper"
+require "packnga"
 
 base_dir = File.join(File.dirname(__FILE__))
 
@@ -28,6 +29,8 @@ end
 
 helper.install
 spec = helper.gemspec
+
+Packnga::ReleaseTask.new(spec)
 
 desc "Run test"
 task :test do
