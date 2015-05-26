@@ -140,7 +140,7 @@ module Fluent
         when "IssuesEvent"
           process_issue_event(event)
         when "IssueCommentEvent"
-          emit("issue-comment", event)
+          emit("issue.comment", event)
         when "ForkEvent"
           emit("fork", event)
         when "PullRequestEvent"
