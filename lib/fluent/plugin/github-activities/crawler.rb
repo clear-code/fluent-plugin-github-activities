@@ -138,7 +138,7 @@ module Fluent
         when "CommitCommentEvent"
           emit("commit-comment", event)
         when "IssuesEvent"
-          emit("issues", event)
+          process_issue_event(event)
         when "IssueCommentEvent"
           emit("issue-comment", event)
         when "ForkEvent"
@@ -161,6 +161,26 @@ module Fluent
 
       def process_commit(commit)
         emit("commit", commit)
+      end
+
+      def process_issue_event(event)
+        payload = event["payload"]
+        case payload["action"]
+        when "opened"
+          emit("issue.open", event)
+        when "closed"
+          emit("issue.close", event)
+        when "reopened"
+          emit("issue.reopen", event)
+        when "assigned"
+          emit("issue.assign", event)
+        when "unassigned"
+          emit("issue.unassign", event)
+        when "labeled"
+          emit("issue.label", event)
+        when "unlabeled"
+          emit("issue.unlabel", event)
+        end
       end
 
       private
