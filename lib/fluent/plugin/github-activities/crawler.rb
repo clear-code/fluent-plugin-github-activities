@@ -75,7 +75,7 @@ module Fluent
             process_user_events(request[:user], events)
             reserve_user_events(request[:user], :previous_response => response)
           when TYPE_COMMIT
-            process_commit(body)
+            process_commit(body, request[:push])
           end
         when Net::HTTPNotModified
           case request[:type]
@@ -152,15 +152,28 @@ module Fluent
 
       def process_push_event(event)
         payload = event["payload"]
-        payload["commits"].each do |commit|
-          @request_queue.push(:type => TYPE_COMMIT,
-                              :uri  => commit["url"])
+        inserted_requests = []
+        payload["commits"].reverse.each do |commit_reference|
+          @request_queue.unshift(:type => TYPE_COMMIT,
+                                 :uri  => commit_reference["url"],
+                                 :push => event)
         end
-        emit("push", event)
+        # emit("push", event)
       end
 
-      def process_commit(commit)
+      def process_commit(commit, push_event)
         emit("commit", commit)
+
+        commits = push_event["payload"]["commits"]
+        reference = commits.find do |reference|
+          reference["url"] == commit["url"]
+        end
+        reference["commit"] = commit if reference
+
+        completely_fetched = commits.all? do |reference|
+          reference["commit"]
+        end
+        emit("push", push_event) if completely_fetched
       end
 
       def process_issue_event(event)
