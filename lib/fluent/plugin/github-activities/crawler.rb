@@ -169,7 +169,7 @@ module Fluent
       end
 
       def emit(tag, record)
-        $log.info("GithubActivities::Crawler: emit => #{tag}, #{record.inspect}")
+        $log.trace("GithubActivities::Crawler: emit => #{tag}, #{record.inspect}")
         @on_emit.call(tag, record) if @on_emit
       end
     end
