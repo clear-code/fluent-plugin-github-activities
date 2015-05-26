@@ -31,6 +31,9 @@ module Fluent
       attr_reader :request_queue
 
       def initialize(options={})
+        @username = options[:username]
+        @password = options[:password]
+        @log = options[:logger]
         @request_queue = options[:request_queue] || []
       end
 
@@ -46,10 +49,18 @@ module Fluent
 
         uri = request_uri(request)
         extra_headers = extra_request_headers(request)
+        response = nil
 
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = uri.is_a?(URI::HTTPS)
-        response = http.get(uri.path, extra_headers)
+        http.start do |http|
+          http_request = Net::HTTP::Get.new(uri.path, extra_headers)
+          if @username and @password
+            http_request.basic_auth(@username, @password)
+          end
+          response = http.request(http_request)
+        end
+        $log.info("GithubActivities::Crawler: response: #{response.inspect}")
 
         case response
         when Net::HTTPSuccess

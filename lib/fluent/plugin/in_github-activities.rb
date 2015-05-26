@@ -23,6 +23,8 @@ module Fluent
 
     Plugin.register_input("github-activities", self)
 
+    config_param :basic_username, :string, :default => nil
+    config_param :basic_password, :string, :default => nil
     config_param :users, :string, :default => nil
     config_param :users_list, :string, :default => nil
     config_param :base_tag, :string, :default => DEFAULT_BASE_TAG
@@ -38,7 +40,8 @@ module Fluent
 
     def start
       @thread = Thread.new do
-        @crawler = ::Fluent::GithubActivities::Crawler.new
+        @crawler = ::Fluent::GithubActivities::Crawler.new(:username => @basic_username,
+                                                           :password => @basic_password)
         @crawler.on_emit = lambda do |tag, record|
           Engine.emit("#{@base_tag}.#{tag}", Engine.now, record)
         end
