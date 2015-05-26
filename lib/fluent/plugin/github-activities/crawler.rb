@@ -140,11 +140,11 @@ module Fluent
         when "IssuesEvent"
           process_issue_event(event)
         when "IssueCommentEvent"
-          emit("issue.comment", event)
+          process_issue_or_pull_request_comment_event(event)
         when "ForkEvent"
           emit("fork", event)
         when "PullRequestEvent"
-          emit("pull-request", event)
+          process_pull_request_event(event)
         else
           emit(event["type"], event)
         end
@@ -180,6 +180,32 @@ module Fluent
           emit("issue.label", event)
         when "unlabeled"
           emit("issue.unlabel", event)
+        end
+      end
+
+      def process_pull_request_event(event)
+        payload = event["payload"]
+        case payload["action"]
+        when "opened"
+          emit("pull-request.open", event)
+        when "closed"
+          if payload["pull_request"]["merged"]
+            emit("pull-request.merged", event)
+          else
+            emit("pull-request.cancelled", event)
+          end
+        when "reopened"
+          emit("pull-request.reopen", event)
+        end
+      end
+
+      def process_issue_or_pull_request_comment_event(event)
+        payload = event["payload"]
+        if payload["issue"]["pull_request"]
+          emit("pull-request.comment", event)
+          # emit("pull-request.cancel", event)
+        else
+          emit("issue.comment", event)
         end
       end
 
