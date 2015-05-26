@@ -41,6 +41,7 @@ module Fluent
         raise EmptyRequestQueue.new if @request_queue.empty?
 
         request = @request_queue.shift
+        $log.info("GithubActivities::Crawler: processing request: #{request.inspect}")
         if request[:process_after] and
              Time.now.to_i < request[:process_after]
           @request_queue.push(request)
@@ -51,6 +52,7 @@ module Fluent
         extra_headers = extra_request_headers(request)
         response = nil
 
+        $log.info("GithubActivities::Crawler: requesting to #{uri.inspect}")
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = uri.is_a?(URI::HTTPS)
         http.start do |http|
@@ -65,9 +67,11 @@ module Fluent
         case response
         when Net::HTTPSuccess
           body = JSON.parse(response.body)
+          $log.info("GithubActivities::Crawler: request type: #{request[:type]}")
           case request[:type]
           when TYPE_EVENTS
             events = body
+            $log.info("GithubActivities::Crawler: events size: #{events.size}")
             process_user_events(request[:user], events)
             reserve_user_events(request[:user], :previous_response => response)
           when TYPE_COMMIT
@@ -165,6 +169,7 @@ module Fluent
       end
 
       def emit(tag, record)
+        $log.info("GithubActivities::Crawler: emit => #{tag}, #{record.inspect}")
         @on_emit.call(tag, record) if @on_emit
       end
     end
