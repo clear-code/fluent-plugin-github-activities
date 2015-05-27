@@ -28,6 +28,7 @@ module Fluent
     config_param :users, :string, :default => nil
     config_param :users_list, :string, :default => nil
     config_param :base_tag, :string, :default => DEFAULT_BASE_TAG
+    config_param :pos_file, :string, :default => nil
     config_param :interval, :integer, :default => 1
 
     def initialize
@@ -42,7 +43,8 @@ module Fluent
       @base_tag = @base_tag.sub(/\.\z/, "")
       @thread = Thread.new do
         @crawler = ::Fluent::GithubActivities::Crawler.new(:username => @basic_username,
-                                                           :password => @basic_password)
+                                                           :password => @basic_password,
+                                                           :pos_file => @pos_file)
         @crawler.on_emit = lambda do |tag, record|
           Engine.emit("#{@base_tag}.#{tag}", Engine.now, record)
         end

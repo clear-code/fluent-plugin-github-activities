@@ -20,6 +20,9 @@
 require "uri"
 require "net/https"
 require "json"
+require "pathname"
+
+require "fluent/plugin/github-activities/safe_file_writer"
 
 module Fluent
   module GithubActivities
@@ -33,7 +36,12 @@ module Fluent
       def initialize(options={})
         @username = options[:username]
         @password = options[:password]
-        @log = options[:logger]
+
+        @positions = {}
+        @pos_file = options[:pos_file]
+        @pos_file = Pathname(@pos_file) if @pos_file
+        load_positions
+
         @request_queue = options[:request_queue] || []
       end
 
@@ -74,6 +82,9 @@ module Fluent
             $log.info("GithubActivities::Crawler: events size: #{events.size}")
             process_user_events(request[:user], events)
             reserve_user_events(request[:user], :previous_response => response)
+            save_user_position(request[:user],
+                               :entity_tag           => response["ETag"],
+                               :last_event_timestamp => events.first["created_at"])
           when TYPE_COMMIT
             process_commit(body, request[:push])
           end
@@ -243,6 +254,27 @@ module Fluent
       def emit(tag, record)
         $log.trace("GithubActivities::Crawler: emit => #{tag}, #{record.inspect}")
         @on_emit.call(tag, record) if @on_emit
+      end
+
+      def load_positions
+        return unless @pos_file
+        return unless @pos_file.exist?
+
+        @positions = JSON.parse(@pos_file.read)
+      rescue
+        @positions = {}
+      end
+
+      def save_positions
+        return unless @pos_file
+        SafeFileWriter.write(@pos_file, JSON.pretty_generate(@positions))
+      end
+
+      def save_user_position(user, params)
+        @positions[user] ||= {}
+        @positions[user]["entity_tag"]           = params[:entity_tag]
+        @positions[user]["last_event_timestamp"] = Time.parse(params[:last_event_timestamp]).to_i
+        save_positions
       end
     end
   end
