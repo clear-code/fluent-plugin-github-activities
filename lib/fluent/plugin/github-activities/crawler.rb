@@ -84,13 +84,7 @@ module Fluent
             $log.info("GithubActivities::Crawler: events size: #{events.size}")
             process_user_events(request[:user], events)
             reserve_user_events(request[:user], :previous_response => response)
-            last_event_timestamp = DEFAULT_LAST_EVENT_TIMESTAMP
-            unless events.empty?
-              last_event_timestamp = Time.parse(events.first["created_at"]).to_i
-            end
-            save_user_position(request[:user],
-                               :entity_tag           => response["ETag"],
-                               :last_event_timestamp => last_event_timestamp)
+            save_user_position(request[:user], :entity_tag => response["ETag"])
           when TYPE_COMMIT
             process_commit(body, request[:push])
           end
@@ -153,6 +147,7 @@ module Fluent
           timestamp = Time.parse(event["created_at"]).to_i
           next if timestamp <= last_event_timestamp
           process_user_event(user, event)
+          save_user_position(user, :last_event_timestamp => timestamp)
         end
       end
 
@@ -287,8 +282,19 @@ module Fluent
 
       def save_user_position(user, params)
         @positions[user] ||= {}
-        @positions[user]["entity_tag"]           = params[:entity_tag]
-        @positions[user]["last_event_timestamp"] = params[:last_event_timestamp]
+
+        if params[:entity_tag]
+          @positions[user]["entity_tag"] = params[:entity_tag]
+        end
+
+        if params[:last_event_timestamp] and
+             params[:last_event_timestamp] != DEFAULT_LAST_EVENT_TIMESTAMP
+          old_timestamp = @positions[user]["last_event_timestamp"]
+          if old_timestamp.nil? or old_timestamp < params[:last_event_timestamp]
+            @positions[user]["last_event_timestamp"] = params[:last_event_timestamp]
+          end
+        end
+
         save_positions
       end
     end
