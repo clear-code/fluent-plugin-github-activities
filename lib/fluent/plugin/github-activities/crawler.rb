@@ -145,6 +145,8 @@ module Fluent
           emit("fork", event)
         when "PullRequestEvent"
           process_pull_request_event(event)
+        when "CreateEvent"
+          process_create_event(event)
         else
           emit(event["type"], event)
         end
@@ -220,6 +222,16 @@ module Fluent
           # emit("pull-request.cancel", event)
         else
           emit("issue.comment", event)
+        end
+      end
+
+      def process_create_event(event)
+        payload = event["payload"]
+        case payload["ref_type"]
+        when "branch"
+          emit("branch", event)
+        when "tag"
+          emit("tag", event)
         end
       end
 
