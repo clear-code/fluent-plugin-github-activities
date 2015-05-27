@@ -30,6 +30,8 @@ module Fluent
       class EmptyRequestQueue < StandardError
       end
 
+      DEFAULT_LAST_EVENT_TIMESTAMP = -1
+
       attr_writer :on_emit
       attr_reader :request_queue
 
@@ -82,9 +84,13 @@ module Fluent
             $log.info("GithubActivities::Crawler: events size: #{events.size}")
             process_user_events(request[:user], events)
             reserve_user_events(request[:user], :previous_response => response)
+            last_event_timestamp = DEFAULT_LAST_EVENT_TIMESTAMP
+            unless events.empty?
+              last_event_timestamp = events.first["created_at"]
+            end
             save_user_position(request[:user],
                                :entity_tag           => response["ETag"],
-                               :last_event_timestamp => events.first["created_at"])
+                               :last_event_timestamp => last_event_timestamp)
           when TYPE_COMMIT
             process_commit(body, request[:push])
           end
