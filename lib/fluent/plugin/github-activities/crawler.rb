@@ -120,6 +120,9 @@ module Fluent
         headers = {}
         if request[:previous_entity_tag]
           headers["If-None-Match"] = request[:previous_entity_tag]
+        elsif request[:type] == TYPE_EVENTS and @positions[request[:user]]
+          entity_tag = @positions[request[:user]]["entity_tag"]
+          headers["If-None-Match"] = entity_tag if entity_tag
         end
         headers
       end
@@ -142,7 +145,13 @@ module Fluent
       end
 
       def process_user_events(user, events)
+        last_event_timestamp = DEFAULT_LAST_EVENT_TIMESTAMP
+        if @positions[user] and @positions[user]["last_event_timestamp"]
+          last_event_timestamp = @positions[user]["last_event_timestamp"]
+        end
         events.each do |event|
+          timestamp = Time.parse(event["created_at"]).to_i
+          next if timestamp <= last_event_timestamp
           process_user_event(user, event)
         end
       end
