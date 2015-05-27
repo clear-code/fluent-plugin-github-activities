@@ -153,9 +153,10 @@ module Fluent
       def process_push_event(event)
         payload = event["payload"]
         inserted_requests = []
-        payload["commits"].reverse.each do |commit_reference|
+        commit_refs = payload["commits"]
+        commit_refs.reverse.each do |commit_ref|
           @request_queue.unshift(:type => TYPE_COMMIT,
-                                 :uri  => commit_reference["url"],
+                                 :uri  => commit_ref["url"],
                                  :push => event)
         end
         # emit("push", event)
@@ -164,14 +165,14 @@ module Fluent
       def process_commit(commit, push_event)
         emit("commit", commit)
 
-        commits = push_event["payload"]["commits"]
-        reference = commits.find do |reference|
-          reference["url"] == commit["url"]
+        commit_refs = push_event["payload"]["commits"]
+        target_commit_ref = commit_refs.find do |commit_ref|
+          commit_ref["url"] == commit["url"]
         end
-        reference["commit"] = commit if reference
+        target_commit_ref["commit"] = commit if target_commit_ref
 
-        completely_fetched = commits.all? do |reference|
-          reference["commit"]
+        completely_fetched = commit_refs.all? do |commit_ref|
+          commit_ref["commit"]
         end
         emit("push", push_event) if completely_fetched
       end
