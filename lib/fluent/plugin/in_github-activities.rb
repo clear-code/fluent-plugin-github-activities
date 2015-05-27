@@ -55,8 +55,8 @@ module Fluent
         end
 
         loop do
-          @crawler.process_request
-          sleep(@interval)
+          actually_requested = @crawler.process_request
+          sleep(@interval) if actually_requested
         end
       end
     end

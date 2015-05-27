@@ -95,6 +95,7 @@ module Fluent
                                 :previous_response => response,
                                 :previous_entity_tag => extra_headers["If-None-Match"])
           end
+          return false
         end
         true
       end
