@@ -39,6 +39,7 @@ module Fluent
     end
 
     def start
+      @base_tag = @base_tag.sub(/\.\z/, "")
       @thread = Thread.new do
         @crawler = ::Fluent::GithubActivities::Crawler.new(:username => @basic_username,
                                                            :password => @basic_password)
