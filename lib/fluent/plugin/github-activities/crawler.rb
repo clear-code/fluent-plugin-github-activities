@@ -86,7 +86,7 @@ module Fluent
             reserve_user_events(request[:user], :previous_response => response)
             last_event_timestamp = DEFAULT_LAST_EVENT_TIMESTAMP
             unless events.empty?
-              last_event_timestamp = events.first["created_at"]
+              last_event_timestamp = Time.parse(events.first["created_at"]).to_i
             end
             save_user_position(request[:user],
                                :entity_tag           => response["ETag"],
@@ -288,7 +288,7 @@ module Fluent
       def save_user_position(user, params)
         @positions[user] ||= {}
         @positions[user]["entity_tag"]           = params[:entity_tag]
-        @positions[user]["last_event_timestamp"] = Time.parse(params[:last_event_timestamp]).to_i
+        @positions[user]["last_event_timestamp"] = params[:last_event_timestamp]
         save_positions
       end
     end
