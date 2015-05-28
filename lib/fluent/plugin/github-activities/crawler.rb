@@ -35,6 +35,8 @@ module Fluent
 
       DEFAULT_LAST_EVENT_TIMESTAMP = -1
 
+      RELATED_USER_IMAGE_KEY = "$github-activities-related-avatar"
+
       attr_writer :on_emit
       attr_reader :request_queue, :interval_for_next_request
 
@@ -52,11 +54,14 @@ module Fluent
         @pos_file = Pathname(@pos_file) if @pos_file
         load_positions
 
+        @avatars = {}
+
         @request_queue = options[:request_queue] || []
 
         @default_interval = options[:default_interval] || DEFAULT_INTERVAL
 
         @watching_users.each do |user|
+          fetch_avatar(user)
           reserve_user_events(user)
         end
       end
@@ -161,6 +166,7 @@ module Fluent
 
       def process_user_event(user, event)
         # see also: https://developer.github.com/v3/activity/events/types/
+        event[RELATED_USER_IMAGE_KEY] = @avatars[user]
         case event["type"]
         when "PushEvent"
           process_push_event(event)
@@ -197,8 +203,11 @@ module Fluent
       end
 
       def process_commit(commit, push_event)
-        if @include_foreign_commits or
-             watching_user?(commit["author"]["login"])
+        user = commit["author"]["login"]
+        fetch_avatar(user)
+
+        if @include_foreign_commits or watching_user?(user)
+          commit[RELATED_USER_IMAGE_KEY] = @avatars[user]
           emit("commit", commit)
         end
 
@@ -287,9 +296,20 @@ module Fluent
         end
       end
 
+      def fetch_avatar(user)
+        return if @avatars.key?(user)
+        response = http_get(user_info(user))
+        fetched_user_info = JSON.parse(response.body)
+        @avatars[user] = fetched_user_info["avatar_url"]
+      end
+
       private
       def user_activities(user)
         "https://api.github.com/users/#{user}/events/public"
+      end
+
+      def user_info(user)
+        "https://api.github.com/users/#{user}"
       end
 
       def emit(tag, record)
