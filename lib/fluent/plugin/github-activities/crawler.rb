@@ -39,6 +39,9 @@ module Fluent
         @username = options[:username]
         @password = options[:password]
 
+        @include_commits_from_pull_request = options[:include_commits_from_pull_request]
+        @include_foreign_commits = options[:include_foreign_commits]
+
         @positions = {}
         @pos_file = options[:pos_file]
         @pos_file = Pathname(@pos_file) if @pos_file
