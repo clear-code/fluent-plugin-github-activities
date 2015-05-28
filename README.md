@@ -7,7 +7,7 @@ This crawls GitHub activities of specified users and forward each activity as a 
 
  * Activities related to commits
    * `push`
-   * `commit`
+   * `commit` (See also following notes)
    * `commit-comment`
  * Activities related to repositories
    * `fork`
@@ -33,9 +33,11 @@ See also [the API documentations of GitHub activity events](https://developer.gi
 
 Notes:
 
- * Because a "push" activity doesn't include full information of each commit, commits are separately forwarded as [commits](https://developer.github.com/v3/git/commits/).
+ * Because a "push" activity doesn't include full information of each commit, commits are separately forwarded [commits](https://developer.github.com/v3/git/commits/) as pseudo `commit` activities.
  * All forwarded records have an extra property "$github-activities-related-avatar".
    It will be useful to get the URI of the avatar image easily, for both activity events and commits.
+ * Unsupported activities are also forwarded with their raw event type like `StatusEvent`.
+
 
 ## Configurations
 
@@ -59,8 +61,9 @@ Notes:
   # can be forwarded after the fluentd is restarted.
   pos_file /tmp/github-activities.json
 
-  # Base tag of forwarded records. It will be used as:
-  # <base_tag>.commit, <base_tag>.push, etc.
+  # Base tag of forwarded records. It will be used as
+  # <base_tag>.<activity type>, like: "github-activity.push",
+  # "github-activity.StatusEvent", etc.
   base_tag github-activity.
 
   # The lisf of target users' account IDs on the GitHub to be crawled.
