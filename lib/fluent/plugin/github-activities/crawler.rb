@@ -201,7 +201,7 @@ module Fluent
       def process_commit(commit, push_event)
         if @include_foreign_commits or
              watching_user?(commit["author"]["login"])
-        emit("commit", commit)
+          emit("commit", commit)
         end
 
         commit_refs = push_event["payload"]["commits"]
