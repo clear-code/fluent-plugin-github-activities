@@ -3,7 +3,39 @@
 Provides ability to watch public activities on GitHub.
 This crawls GitHub activities of specified users and forward each activity as a record.
 
+## Supported activity types
+
+ * Activities related to commits
+   * `push`
+   * `commit`
+   * `commit-comment`
+ * Activities related to repositories
+   * `fork`
+   * `branch`
+   * `tag`
+ * Activities related to issues
+   * `issue-open`
+   * `issue-close`
+   * `issue-reopen`
+   * `issue-assign`
+   * `issue-unassign`
+   * `issue-label`
+   * `issue-unlabel`
+ * Activities related to pull requests
+   * `pull-request`
+   * `pull-request-merged`
+   * `pull-request-cancelled`
+   * `pull-request-reopen`
+   * `pull-request-comment`
+
+Forwarded message is same to an activity provided by GitHub.
 See also [the API documentations of GitHub activity events](https://developer.github.com/v3/activity/events/).
+
+Notes:
+
+ * Because a "push" activity doesn't include full information of each commit, commits are separately forwarded as [commits](https://developer.github.com/v3/git/commits/).
+ * All forwarded records have an extra property "$github-activities-related-avatar".
+   It will be useful to get the URI of the avatar image easily, for both activity events and commits.
 
 ## Configurations
 
