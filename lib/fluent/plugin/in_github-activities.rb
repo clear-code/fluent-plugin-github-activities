@@ -42,9 +42,12 @@ module Fluent
     def start
       @base_tag = @base_tag.sub(/\.\z/, "")
       @thread = Thread.new do
-        @crawler = ::Fluent::GithubActivities::Crawler.new(:username => @basic_username,
-                                                           :password => @basic_password,
-                                                           :pos_file => @pos_file)
+        crawler_options = {
+          :username => @basic_username,
+          :password => @basic_password,
+          :pos_file => @pos_file,
+        }
+        @crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
         @crawler.on_emit = lambda do |tag, record|
           Engine.emit("#{@base_tag}.#{tag}", Engine.now, record)
         end
