@@ -231,19 +231,19 @@ module Fluent
         payload = event["payload"]
         case payload["action"]
         when "opened"
-          emit("issue.open", event)
+          emit("issue-open", event)
         when "closed"
-          emit("issue.close", event)
+          emit("issue-close", event)
         when "reopened"
-          emit("issue.reopen", event)
+          emit("issue-reopen", event)
         when "assigned"
-          emit("issue.assign", event)
+          emit("issue-assign", event)
         when "unassigned"
-          emit("issue.unassign", event)
+          emit("issue-unassign", event)
         when "labeled"
-          emit("issue.label", event)
+          emit("issue-label", event)
         when "unlabeled"
-          emit("issue.unlabel", event)
+          emit("issue-unlabel", event)
         end
       end
 
@@ -251,15 +251,15 @@ module Fluent
         payload = event["payload"]
         case payload["action"]
         when "opened"
-          emit("pull-request.open", event)
+          emit("pull-request", event)
         when "closed"
           if payload["pull_request"]["merged"]
-            emit("pull-request.merged", event)
+            emit("pull-request-merged", event)
           else
-            emit("pull-request.cancelled", event)
+            emit("pull-request-cancelled", event)
           end
         when "reopened"
-          emit("pull-request.reopen", event)
+          emit("pull-request-reopen", event)
         end
       end
 
@@ -279,10 +279,10 @@ module Fluent
       def process_issue_or_pull_request_comment_event(event)
         payload = event["payload"]
         if payload["issue"]["pull_request"]
-          emit("pull-request.comment", event)
+          emit("pull-request-comment", event)
           # emit("pull-request.cancel", event)
         else
-          emit("issue.comment", event)
+          emit("issue-comment", event)
         end
       end
 
