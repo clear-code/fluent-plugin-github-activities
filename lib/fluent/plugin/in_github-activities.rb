@@ -47,6 +47,7 @@ module Fluent
         crawler_options = {
           :username => @basic_username,
           :password => @basic_password,
+          :watching_users => prepare_users_list,
           :include_commits_from_pull_request => @include_commits_from_pull_request,
           :include_foreign_commits => @include_foreign_commits,
           :pos_file => @pos_file,
@@ -54,11 +55,6 @@ module Fluent
         @crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
         @crawler.on_emit = lambda do |tag, record|
           Engine.emit("#{@base_tag}.#{tag}", Engine.now, record)
-        end
-
-        users = prepare_users_list
-        users.each do |user|
-          @crawler.reserve_user_events(user)
         end
 
         loop do

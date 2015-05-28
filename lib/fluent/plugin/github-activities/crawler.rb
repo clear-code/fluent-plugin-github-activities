@@ -39,6 +39,8 @@ module Fluent
         @username = options[:username]
         @password = options[:password]
 
+        @watching_users = options[:watching_users] || []
+
         @include_commits_from_pull_request = options[:include_commits_from_pull_request]
         @include_foreign_commits = options[:include_foreign_commits]
 
@@ -48,6 +50,10 @@ module Fluent
         load_positions
 
         @request_queue = options[:request_queue] || []
+
+        @watching_users.each do |user|
+          reserve_user_events(user)
+        end
       end
 
       def process_request
@@ -193,7 +199,10 @@ module Fluent
       end
 
       def process_commit(commit, push_event)
+        if @include_foreign_commits or
+             watching_user?(commit["author"]["login"])
         emit("commit", commit)
+        end
 
         commit_refs = push_event["payload"]["commits"]
         target_commit_ref = commit_refs.find do |commit_ref|
@@ -205,6 +214,10 @@ module Fluent
           commit_ref["commit"]
         end
         emit("push", push_event) if completely_fetched
+      end
+
+      def watching_user?(user)
+        @watching_users.include(user)
       end
 
       def process_issue_event(event)
