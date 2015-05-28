@@ -51,6 +51,7 @@ module Fluent
           :include_commits_from_pull_request => @include_commits_from_pull_request,
           :include_foreign_commits => @include_foreign_commits,
           :pos_file => @pos_file,
+          :default_interval => @interval,
         }
         @crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
         @crawler.on_emit = lambda do |tag, record|
@@ -58,8 +59,8 @@ module Fluent
         end
 
         loop do
-          actually_requested = @crawler.process_request
-          sleep(@interval) if actually_requested
+          @crawler.process_request
+          sleep(@crawler.interval_for_next_request)
         end
       end
     end

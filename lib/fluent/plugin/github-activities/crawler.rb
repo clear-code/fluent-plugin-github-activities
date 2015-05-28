@@ -30,10 +30,13 @@ module Fluent
       class EmptyRequestQueue < StandardError
       end
 
+      NO_INTERVAL = 0
+      DEFAULT_INTERVAL = 1
+
       DEFAULT_LAST_EVENT_TIMESTAMP = -1
 
       attr_writer :on_emit
-      attr_reader :request_queue
+      attr_reader :request_queue, :interval_for_next_request
 
       def initialize(options={})
         @username = options[:username]
@@ -51,6 +54,8 @@ module Fluent
 
         @request_queue = options[:request_queue] || []
 
+        @default_interval = options[:default_interval] || DEFAULT_INTERVAL
+
         @watching_users.each do |user|
           reserve_user_events(user)
         end
@@ -64,6 +69,7 @@ module Fluent
         if request[:process_after] and
              Time.now.to_i < request[:process_after]
           @request_queue.push(request)
+          @interval_for_next_request = NO_INTERVAL
           return false
         end
 
@@ -104,9 +110,9 @@ module Fluent
                                 :previous_response => response,
                                 :previous_entity_tag => extra_headers["If-None-Match"])
           end
-          return false
         end
-        true
+        @interval_for_next_request = @default_interval
+        return true
       end
 
       def request_uri(request)
