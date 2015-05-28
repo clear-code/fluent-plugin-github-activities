@@ -116,7 +116,6 @@ module Fluent
         else
           uri = request[:uri]
         end
-        URI(uri)
       end
 
       def extra_request_headers(request)
@@ -299,11 +298,12 @@ module Fluent
       end
 
       def http_get(uri, extra_headers={})
+        parsed_uri = URI(uri)
         response = nil
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = uri.is_a?(URI::HTTPS)
+        http = Net::HTTP.new(parsed_uri.host, parsed_uri.port)
+        http.use_ssl = parsed_uri.is_a?(URI::HTTPS)
         http.start do |http|
-          http_request = Net::HTTP::Get.new(uri.path, extra_headers)
+          http_request = Net::HTTP::Get.new(parsed_uri.path, extra_headers)
           if @username and @password
             http_request.basic_auth(@username, @password)
           end
