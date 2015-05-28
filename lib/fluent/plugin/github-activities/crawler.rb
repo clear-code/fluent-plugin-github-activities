@@ -75,18 +75,9 @@ module Fluent
 
         uri = request_uri(request)
         extra_headers = extra_request_headers(request)
-        response = nil
 
         $log.info("GithubActivities::Crawler: requesting to #{uri.inspect}")
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = uri.is_a?(URI::HTTPS)
-        http.start do |http|
-          http_request = Net::HTTP::Get.new(uri.path, extra_headers)
-          if @username and @password
-            http_request.basic_auth(@username, @password)
-          end
-          response = http.request(http_request)
-        end
+        response = http_get(uri, extra_headers)
         $log.info("GithubActivities::Crawler: response: #{response.inspect}")
 
         case response
@@ -305,6 +296,20 @@ module Fluent
       def emit(tag, record)
         $log.trace("GithubActivities::Crawler: emit => #{tag}, #{record.inspect}")
         @on_emit.call(tag, record) if @on_emit
+      end
+
+      def http_get(uri, extra_headers={})
+        response = nil
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = uri.is_a?(URI::HTTPS)
+        http.start do |http|
+          http_request = Net::HTTP::Get.new(uri.path, extra_headers)
+          if @username and @password
+            http_request.basic_auth(@username, @password)
+          end
+          response = http.request(http_request)
+        end
+        response
       end
 
       def load_positions
