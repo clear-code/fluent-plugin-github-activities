@@ -27,6 +27,8 @@ module Fluent
     config_param :basic_password, :string, :default => nil
     config_param :users, :string, :default => nil
     config_param :users_list, :string, :default => nil
+    config_param :include_commits_from_pull_request, :bool, :default => false
+    config_param :include_foreign_commits, :bool, :default => false
     config_param :base_tag, :string, :default => DEFAULT_BASE_TAG
     config_param :pos_file, :string, :default => nil
     config_param :interval, :integer, :default => 1
@@ -45,6 +47,8 @@ module Fluent
         crawler_options = {
           :username => @basic_username,
           :password => @basic_password,
+          :include_commits_from_pull_request => @include_commits_from_pull_request,
+          :include_foreign_commits => @include_foreign_commits,
           :pos_file => @pos_file,
         }
         @crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
