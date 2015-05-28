@@ -179,8 +179,11 @@ module Fluent
 
       def process_push_event(event)
         payload = event["payload"]
-        inserted_requests = []
         commit_refs = payload["commits"]
+        if !@include_commits_from_pull_request and
+             push_event_from_merged_pull_request?(event)
+          return
+        end
         commit_refs.reverse.each do |commit_ref|
           @request_queue.unshift(:type => TYPE_COMMIT,
                                  :uri  => commit_ref["url"],
@@ -237,6 +240,19 @@ module Fluent
           end
         when "reopened"
           emit("pull-request.reopen", event)
+        end
+      end
+
+      MERGE_COMMIT_MESSAGE_PATTERN = /\AMerge pull request #\d+ from [^\/]+\/[^\/]+\n\n/
+
+      def push_event_from_merged_pull_request?(event)
+        payload = event["payload"]
+        inserted_requests = []
+        commit_refs = payload["commits"]
+        if MERGE_COMMIT_MESSAGE_PATTERN =~ commit_refs.last["message"]
+          true
+        else
+          false
         end
       end
 
