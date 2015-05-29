@@ -156,6 +156,9 @@ module Fluent
         if @positions[user] and @positions[user]["last_event_timestamp"]
           last_event_timestamp = @positions[user]["last_event_timestamp"]
         end
+        events = events.sort do |a, b|
+          b["created_at"] <=> a["created_at"]
+        end
         events.each do |event|
           timestamp = Time.parse(event["created_at"]).to_i
           next if timestamp <= last_event_timestamp
