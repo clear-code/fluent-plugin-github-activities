@@ -329,14 +329,14 @@ module Fluent
 
       def http_get(uri, extra_headers={})
         parsed_uri = URI(uri)
+        if @access_token
+          extra_headers["Authorization"] = "token #{@access_token}"
+        end
         response = nil
         http = Net::HTTP.new(parsed_uri.host, parsed_uri.port)
         http.use_ssl = parsed_uri.is_a?(URI::HTTPS)
         http.start do |http|
           http_request = Net::HTTP::Get.new(parsed_uri.path, extra_headers)
-          if @access_token
-            extra_headers["Authorization"] = "token #{@access_token}"
-          end
           response = http.request(http_request)
         end
         response
