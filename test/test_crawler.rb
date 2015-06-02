@@ -165,6 +165,33 @@ class CrawlerTest < Test::Unit::TestCase
   end
 
   class PushEventTest < self
+    def test_single_commit
+      push = JSON.parse(fixture_data("push-event.json"))
+      push = fill_extra_fields(push)
+      base = "https://api.github.com/repos/clear-code/fluent-plugin-github-activities/commits"
+      @crawler.process_user_event("user", push)
+
+      expected_commit = JSON.parse(fixture_data("commit.json"))
+      expected_push = JSON.parse(fixture_data("push-event.json"))
+
+      expected_commit = fill_extra_fields(expected_commit, expected_push)
+
+      expected_push = fill_extra_fields(expected_push)
+      expected = {
+        :request_queue => [
+          { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
+            :uri  => "#{base}/8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+            :sha  => "8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+            :push => expected_push },
+        ],
+        :emitted_records => [
+        ],
+      }
+      assert_equal(expected,
+                   { :request_queue   => @crawler.request_queue,
+                     :emitted_records => @emitted_records })
+    end
+
     def test_multiple_commits
       push = JSON.parse(fixture_data("push-event-multiple-commits.json"))
       push = fill_extra_fields(push)
