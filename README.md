@@ -36,6 +36,8 @@ Notes:
  * Because a "push" activity doesn't include full information of each commit, commits are separately forwarded [commits](https://developer.github.com/v3/git/commits/) as pseudo `commit` activities.
  * All forwarded records have an extra property `$github-activities-related-avatar`.
    It will be useful to get the URI of the avatar image easily, for both activity events and commits.
+ * All forwarded records have an extra property `$github-activities-related-organization-icon`.
+   It will be useful to get the URI of the logo image of the organization easily, for both activity events and commits.
  * Unsupported activities are also forwarded with their raw event type like `StatusEvent`.
 
 
