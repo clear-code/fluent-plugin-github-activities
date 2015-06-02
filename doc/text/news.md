@@ -2,6 +2,8 @@
 
 ## 0.3.0: 2015-06-02
 
+ * Supports authentication with an access token for the OAuth.
+   Instead, BASIC authentication is now obsolete.
  * Add `&github-activities-related-organization-icon` for forwarded records.
  * Report `push` evets even if they include commits already removed on the GitHub.
 
