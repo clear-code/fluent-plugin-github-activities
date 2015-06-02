@@ -1,5 +1,9 @@
 # News
 
+## 0.4.0: 2015-06-02
+
+ * Uses OAuth access token correctly.
+
 ## 0.3.0: 2015-06-02
 
  * Supports authentication with an access token for the OAuth.
