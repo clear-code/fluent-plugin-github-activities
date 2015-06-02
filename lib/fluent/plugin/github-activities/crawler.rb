@@ -42,8 +42,7 @@ module Fluent
       attr_reader :request_queue, :interval_for_next_request
 
       def initialize(options={})
-        @username = options[:username]
-        @password = options[:password]
+        @access_token = options[:access_token]
 
         @watching_users = options[:watching_users] || []
 
@@ -334,8 +333,8 @@ module Fluent
         http.use_ssl = parsed_uri.is_a?(URI::HTTPS)
         http.start do |http|
           http_request = Net::HTTP::Get.new(parsed_uri.path, extra_headers)
-          if @username and @password
-            http_request.basic_auth(@username, @password)
+          if @access_token
+            extra_headers["Authorization"] = "token #{@access_token}"
           end
           response = http.request(http_request)
         end

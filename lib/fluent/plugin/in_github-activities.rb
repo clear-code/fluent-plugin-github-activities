@@ -23,8 +23,7 @@ module Fluent
 
     Plugin.register_input("github-activities", self)
 
-    config_param :basic_username, :string, :default => nil
-    config_param :basic_password, :string, :default => nil
+    config_param :access_token, :string, :default => nil
     config_param :users, :string, :default => nil
     config_param :users_list, :string, :default => nil
     config_param :include_commits_from_pull_request, :bool, :default => false
@@ -45,8 +44,7 @@ module Fluent
       @base_tag = @base_tag.sub(/\.\z/, "")
       @thread = Thread.new do
         crawler_options = {
-          :username => @basic_username,
-          :password => @basic_password,
+          :access_token => @access_token,
           :watching_users => prepare_users_list,
           :include_commits_from_pull_request => @include_commits_from_pull_request,
           :include_foreign_commits => @include_foreign_commits,
