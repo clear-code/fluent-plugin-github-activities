@@ -36,6 +36,7 @@ module Fluent
       DEFAULT_LAST_EVENT_TIMESTAMP = -1
 
       RELATED_USER_IMAGE_KEY = "$github-activities-related-avatar"
+      RELATED_ORGANIZATION_IMAGE_KEY = "$github-activities-related-organization-logo"
 
       attr_writer :on_emit
       attr_reader :request_queue, :interval_for_next_request
@@ -167,6 +168,7 @@ module Fluent
       def process_user_event(user, event)
         # see also: https://developer.github.com/v3/activity/events/types/
         event[RELATED_USER_IMAGE_KEY] = event["actor"]["avatar_url"]
+        event[RELATED_ORGANIZATION_IMAGE_KEY] = event["org"]["avatar_url"]
         case event["type"]
         when "PushEvent"
           process_push_event(event)
@@ -207,6 +209,7 @@ module Fluent
 
         if @include_foreign_commits or watching_user?(user)
           commit[RELATED_USER_IMAGE_KEY] = push_event["actor"]["avatar_url"]
+          commit[RELATED_ORGANIZATION_IMAGE_KEY] = push_event["org"]["avatar_url"]
           emit("commit", commit)
         end
 
