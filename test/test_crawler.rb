@@ -25,11 +25,38 @@ class CrawlerTest < Test::Unit::TestCase
   def setup
     @emitted_records = []
 
-    @crawler = ::Fluent::GithubActivities::Crawler.new
+    @crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
     @crawler.on_emit = lambda do |tag, record|
       @emitted_records << { :tag    => tag,
                             :record => record }
     end
+    @crawler.request_queue.clear
+  end
+
+  def crawler_options
+    {
+      :include_commits_from_pull_request => false,
+      :include_foreign_commits => false,
+      :watching_users => [
+        'piroor',
+      ],
+    }
+  end
+
+  def fill_extra_fields(event, parent_event=nil)
+    parent_event ||= event
+
+    event = event.merge(
+      "$github-activities-related-avatar" => parent_event["actor"]["avatar_url"],
+    )
+
+    if parent_event["org"]
+      event = event.merge(
+        "$github-activities-related-organization-logo" => parent_event["org"]["avatar_url"],
+      )
+    end
+
+    event
   end
 
   REQUEST_PATTERNS = {
@@ -97,12 +124,17 @@ class CrawlerTest < Test::Unit::TestCase
 
   class UserEventTest < self
     def test_generic
-      @crawler.process_user_event("username", { "type" => "test" })
+      event = {
+        "type" => "test",
+        "actor" => {},
+        "created_at" => "2015-05-21T05:37:34Z",
+      }
+      @crawler.process_user_event("username", event)
       expected = {
         :request_queue => [],
         :emitted_records => [
           { :tag    => "test",
-            :record => { "type" => "test" } },
+            :record => fill_extra_fields(event) },
         ],
       }
       assert_equal(expected,
@@ -113,12 +145,17 @@ class CrawlerTest < Test::Unit::TestCase
 
   class UserEventsTest < self
     def test_generic
-      @crawler.process_user_events("username", [{ "type" => "test" }])
+      event = {
+        "type" => "test",
+        "actor" => {},
+        "created_at" => "2015-05-21T05:37:34Z",
+      }
+      @crawler.process_user_events("username", [event])
       expected = {
         :request_queue => [],
         :emitted_records => [
           { :tag    => "test",
-            :record => { "type" => "test" } },
+            :record => fill_extra_fields(event) },
         ],
       }
       assert_equal(expected,
@@ -129,25 +166,41 @@ class CrawlerTest < Test::Unit::TestCase
 
   class PushEventTest < self
     def test_multiple_commits
-      event = JSON.parse(fixture_data("push-event-multiple-commits.json"))
+      push = JSON.parse(fixture_data("push-event-multiple-commits.json"))
+      push = fill_extra_fields(push)
       base = "https://api.github.com/repos/clear-code/fluent-plugin-github-activities/commits"
-      @crawler.process_user_event("user", event)
+      @crawler.process_user_event("user", push)
+
+      expected_commit = JSON.parse(fixture_data("commit.json"))
+      expected_push = JSON.parse(fixture_data("push-event-multiple-commits.json"))
+
+      expected_commit = fill_extra_fields(expected_commit, expected_push)
+
+      expected_push = fill_extra_fields(expected_push)
       expected = {
         :request_queue => [
           { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
-            :uri  => "#{base}/8e90721ff5d89f52b5b3adf0b86db01f03dc5588"},
+            :uri  => "#{base}/8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+            :sha  => "8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+            :push => expected_push },
           { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
-            :uri  => "#{base}/63e085b7607a3043cfbf9a866561807fbdda8a10"},
+            :uri  => "#{base}/63e085b7607a3043cfbf9a866561807fbdda8a10",
+            :sha  => "63e085b7607a3043cfbf9a866561807fbdda8a10",
+            :push => expected_push },
           { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
-            :uri  => "#{base}/c85e33bace040b7b42983e14d2b11a491d102072"},
+            :uri  => "#{base}/c85e33bace040b7b42983e14d2b11a491d102072",
+            :sha  => "c85e33bace040b7b42983e14d2b11a491d102072",
+            :push => expected_push },
           { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
-            :uri  => "#{base}/8ce6de7582376187e17e233dbae13575311a8c0b"},
+            :uri  => "#{base}/8ce6de7582376187e17e233dbae13575311a8c0b",
+            :sha  => "8ce6de7582376187e17e233dbae13575311a8c0b",
+            :push => expected_push },
           { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
-            :uri  => "#{base}/c908f319c7b6d5c5a69c8b675bde40dd990ee364"},
+            :uri  => "#{base}/c908f319c7b6d5c5a69c8b675bde40dd990ee364",
+            :sha  => "c908f319c7b6d5c5a69c8b675bde40dd990ee364",
+            :push => expected_push },
         ],
         :emitted_records => [
-          { :tag    => "push",
-            :record => event }
         ],
       }
       assert_equal(expected,
@@ -157,14 +210,14 @@ class CrawlerTest < Test::Unit::TestCase
   end
 
   class IssuesEventTest < self
-    def test_multiple_commits
+    def test_issue_open
       event = JSON.parse(fixture_data("issues-event.json"))
       @crawler.process_user_event("user", event)
       expected = {
         :request_queue => [],
         :emitted_records => [
-          { :tag    => "issues",
-            :record => event }
+          { :tag    => "issue-open",
+            :record => fill_extra_fields(event) }
         ],
       }
       assert_equal(expected,
@@ -174,14 +227,14 @@ class CrawlerTest < Test::Unit::TestCase
   end
 
   class IssueCommentEventTest < self
-    def test_multiple_commits
+    def test_issue_comment
       event = JSON.parse(fixture_data("issue-comment-event.json"))
       @crawler.process_user_event("user", event)
       expected = {
         :request_queue => [],
         :emitted_records => [
           { :tag    => "issue-comment",
-            :record => event }
+            :record => fill_extra_fields(event) }
         ],
       }
       assert_equal(expected,
@@ -198,7 +251,7 @@ class CrawlerTest < Test::Unit::TestCase
         :request_queue => [],
         :emitted_records => [
           { :tag    => "commit-comment",
-            :record => event }
+            :record => fill_extra_fields(event) }
         ],
       }
       assert_equal(expected,
@@ -215,7 +268,7 @@ class CrawlerTest < Test::Unit::TestCase
         :request_queue => [],
         :emitted_records => [
           { :tag    => "fork",
-            :record => event }
+            :record => fill_extra_fields(event) }
         ],
       }
       assert_equal(expected,
@@ -232,7 +285,7 @@ class CrawlerTest < Test::Unit::TestCase
         :request_queue => [],
         :emitted_records => [
           { :tag    => "pull-request",
-            :record => event }
+            :record => fill_extra_fields(event) }
         ],
       }
       assert_equal(expected,
@@ -242,15 +295,29 @@ class CrawlerTest < Test::Unit::TestCase
   end
 
   class CommitTest < self
-    def test_multiple_commits
+    def test_commit
       commit = JSON.parse(fixture_data("commit.json"))
       push = JSON.parse(fixture_data("push-event.json"))
+      push = fill_extra_fields(push)
       @crawler.process_commit(commit, push)
+
+      expected_commit = JSON.parse(fixture_data("commit.json"))
+      expected_push = JSON.parse(fixture_data("push-event.json"))
+
+      expected_commit = fill_extra_fields(expected_commit, expected_push)
+
+      expected_push["payload"]["commits"].each do |commit|
+        commit["commit"] = expected_commit
+      end
+      expected_push = fill_extra_fields(expected_push)
+
       expected = {
         :request_queue => [],
         :emitted_records => [
           { :tag    => "commit",
-            :record => commit }
+            :record =>  expected_commit },
+          { :tag    => "push",
+            :record => expected_push }
         ],
       }
       assert_equal(expected,
