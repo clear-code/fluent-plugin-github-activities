@@ -1,5 +1,10 @@
 # News
 
+## 0.3.0: 2015-06-02
+
+ * Add `&github-activities-related-organization-icon` for forwarded records.
+ * Report `push` evets even if they include commits already removed on the GitHub.
+
 ## 0.2.0: 2015-05-29
 
  * Fix inverted order of forwarded events: oldest event is now forwarded at first.
