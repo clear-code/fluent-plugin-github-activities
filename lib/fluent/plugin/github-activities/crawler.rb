@@ -240,7 +240,7 @@ module Fluent
       end
 
       def watching_user?(user)
-        @watching_users.include(user)
+        @watching_users.include?(user)
       end
 
       def process_issue_event(event)
