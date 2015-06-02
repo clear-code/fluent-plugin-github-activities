@@ -54,14 +54,11 @@ module Fluent
         @pos_file = Pathname(@pos_file) if @pos_file
         load_positions
 
-        @avatars = {}
-
         @request_queue = options[:request_queue] || []
 
         @default_interval = options[:default_interval] || DEFAULT_INTERVAL
 
         @watching_users.each do |user|
-          fetch_avatar(user)
           reserve_user_events(user)
         end
       end
@@ -169,7 +166,7 @@ module Fluent
 
       def process_user_event(user, event)
         # see also: https://developer.github.com/v3/activity/events/types/
-        event[RELATED_USER_IMAGE_KEY] = @avatars[user]
+        event[RELATED_USER_IMAGE_KEY] = event["actor"]["avatar_url"]
         case event["type"]
         when "PushEvent"
           process_push_event(event)
@@ -207,10 +204,9 @@ module Fluent
 
       def process_commit(commit, push_event)
         user = commit["author"]["login"]
-        fetch_avatar(user)
 
         if @include_foreign_commits or watching_user?(user)
-          commit[RELATED_USER_IMAGE_KEY] = @avatars[user]
+          commit[RELATED_USER_IMAGE_KEY] = push_event["actor"]["avatar_url"]
           emit("commit", commit)
         end
 
@@ -297,13 +293,6 @@ module Fluent
         when "tag"
           emit("tag", event)
         end
-      end
-
-      def fetch_avatar(user)
-        return if @avatars.key?(user)
-        response = http_get(user_info(user))
-        fetched_user_info = JSON.parse(response.body)
-        @avatars[user] = fetched_user_info["avatar_url"]
       end
 
       private
