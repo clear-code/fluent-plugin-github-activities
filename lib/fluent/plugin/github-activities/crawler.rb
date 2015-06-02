@@ -177,7 +177,9 @@ module Fluent
       def process_user_event(user, event)
         # see also: https://developer.github.com/v3/activity/events/types/
         event[RELATED_USER_IMAGE_KEY] = event["actor"]["avatar_url"]
-        event[RELATED_ORGANIZATION_IMAGE_KEY] = event["org"]["avatar_url"]
+        if event["org"]
+          event[RELATED_ORGANIZATION_IMAGE_KEY] = event["org"]["avatar_url"]
+        end
         case event["type"]
         when "PushEvent"
           process_push_event(event)
@@ -220,7 +222,9 @@ module Fluent
 
         if user and (@include_foreign_commits or watching_user?(user))
           commit[RELATED_USER_IMAGE_KEY] = push_event["actor"]["avatar_url"]
-          commit[RELATED_ORGANIZATION_IMAGE_KEY] = push_event["org"]["avatar_url"]
+          if push_event["org"]
+            commit[RELATED_ORGANIZATION_IMAGE_KEY] = push_event["org"]["avatar_url"]
+          end
           emit("commit", commit)
         end
 
