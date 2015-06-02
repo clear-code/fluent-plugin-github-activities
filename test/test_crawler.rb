@@ -54,7 +54,7 @@ class CrawlerTest < Test::Unit::TestCase
   data(REQUEST_PATTERNS)
   def test_request_uri(data)
     uri = @crawler.request_uri(data[:request])
-    assert_equal(URI(data[:uri]), uri)
+    assert_equal(data[:uri], uri)
   end
 
   data(REQUEST_PATTERNS)
@@ -244,7 +244,8 @@ class CrawlerTest < Test::Unit::TestCase
   class CommitTest < self
     def test_multiple_commits
       commit = JSON.parse(fixture_data("commit.json"))
-      @crawler.process_commit(commit)
+      push = JSON.parse(fixture_data("push-event.json"))
+      @crawler.process_commit(commit, push)
       expected = {
         :request_queue => [],
         :emitted_records => [
