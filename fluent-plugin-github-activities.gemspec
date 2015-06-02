@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.authors = ["YUKI Hiroshi"]
   spec.email = ["yuki@clear-code.com"]
   spec.summary = "Fluentd plugin to crawl public activities on the GitHub."
-  spec.description = "This provides ability you fluentd to crawl public " +
+  spec.description = "This provides ability to crawl public " +
                        "activities of users."
   spec.homepage = "https://github.com/groonga/fluent-plugin-groonga"
   spec.license = "LGPL-3.0"
