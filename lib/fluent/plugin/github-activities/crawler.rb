@@ -106,6 +106,15 @@ module Fluent
           end
           @interval_for_next_request = NO_INTERVAL
           return true
+        when Net::HTTPNotFound
+          case request[:type]
+          when TYPE_COMMIT
+            fake_body = {
+              "sha"    => request[:sha],
+              "author" => {},
+            }
+            process_commit(fake_body, request[:push])
+          end
         end
         @interval_for_next_request = @default_interval
         return true
@@ -199,15 +208,17 @@ module Fluent
         commit_refs.reverse.each do |commit_ref|
           @request_queue.unshift(:type => TYPE_COMMIT,
                                  :uri  => commit_ref["url"],
+                                 :sha  => commit_ref["sha"],
                                  :push => event)
         end
         # emit("push", event)
       end
 
       def process_commit(commit, push_event)
+        $log.info("GithubActivities::Crawler: processing commit #{commit["sha"]}")
         user = commit["author"]["login"]
 
-        if @include_foreign_commits or watching_user?(user)
+        if user and (@include_foreign_commits or watching_user?(user))
           commit[RELATED_USER_IMAGE_KEY] = push_event["actor"]["avatar_url"]
           commit[RELATED_ORGANIZATION_IMAGE_KEY] = push_event["org"]["avatar_url"]
           emit("commit", commit)
@@ -215,7 +226,7 @@ module Fluent
 
         commit_refs = push_event["payload"]["commits"]
         target_commit_ref = commit_refs.find do |commit_ref|
-          commit_ref["url"] == commit["url"]
+          commit_ref["sha"] == commit["sha"]
         end
         target_commit_ref["commit"] = commit if target_commit_ref
 
