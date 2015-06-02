@@ -21,6 +21,7 @@ require "uri"
 require "net/https"
 require "json"
 require "pathname"
+require "time"
 
 require "fluent/plugin/github-activities/safe_file_writer"
 
