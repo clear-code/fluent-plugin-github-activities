@@ -68,7 +68,7 @@ module Fluent
         raise EmptyRequestQueue.new if @request_queue.empty?
 
         request = @request_queue.shift
-        $log.info("GithubActivities::Crawler: processing request: #{request.inspect}") if $log
+        $log.debug("GithubActivities::Crawler: processing request: #{request.inspect}") if $log
         if request[:process_after] and
              Time.now.to_i < request[:process_after]
           @request_queue.push(request)
@@ -79,18 +79,18 @@ module Fluent
         uri = request_uri(request)
         extra_headers = extra_request_headers(request)
 
-        $log.info("GithubActivities::Crawler: requesting to #{uri.inspect}") if $log
+        $log.debug("GithubActivities::Crawler: requesting to #{uri.inspect}") if $log
         response = http_get(uri, extra_headers)
-        $log.info("GithubActivities::Crawler: response: #{response.inspect}") if $log
+        $log.debug("GithubActivities::Crawler: response: #{response.inspect}") if $log
 
         case response
         when Net::HTTPSuccess
           body = JSON.parse(response.body)
-          $log.info("GithubActivities::Crawler: request type: #{request[:type]}") if $log
+          $log.trace("GithubActivities::Crawler: request type: #{request[:type]}") if $log
           case request[:type]
           when TYPE_EVENTS
             events = body
-            $log.info("GithubActivities::Crawler: events size: #{events.size}") if $log
+            $log.trace("GithubActivities::Crawler: events size: #{events.size}") if $log
             process_user_events(request[:user], events)
             reserve_user_events(request[:user], :previous_response => response)
             save_user_position(request[:user], :entity_tag => response["ETag"])
@@ -217,7 +217,7 @@ module Fluent
       end
 
       def process_commit(commit, push_event)
-        $log.info("GithubActivities::Crawler: processing commit #{commit["sha"]}") if $log
+        $log.debug("GithubActivities::Crawler: processing commit #{commit["sha"]}") if $log
         user = commit["author"]["login"]
 
         if user and (@include_foreign_commits or watching_user?(user))
