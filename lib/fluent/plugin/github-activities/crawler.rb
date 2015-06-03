@@ -38,6 +38,7 @@ module Fluent
 
       RELATED_USER_IMAGE_KEY = "$github-activities-related-avatar"
       RELATED_ORGANIZATION_IMAGE_KEY = "$github-activities-related-organization-logo"
+      RELATED_EVENT = "$github-activities-related-event"
 
       attr_writer :on_emit
       attr_reader :request_queue, :interval_for_next_request
@@ -225,6 +226,7 @@ module Fluent
           if push_event["org"]
             commit[RELATED_ORGANIZATION_IMAGE_KEY] = push_event["org"]["avatar_url"]
           end
+          commit[RELATED_EVENT] = push_event
           emit("commit", commit)
         end
 
