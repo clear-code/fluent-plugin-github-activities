@@ -22,6 +22,8 @@ require "net/https"
 require "json"
 require "time"
 
+require "fluent/plugin/github-activities/users_manager"
+
 module Fluent
   module GithubActivities
     class Crawler
@@ -41,6 +43,9 @@ module Fluent
       attr_reader :request_queue, :interval_for_next_request
 
       def initialize(options={})
+        @users_manager = UsersManager.new(:users    => options[:watching_users],
+                                          :pos_file => options[:pos_file])
+
         @access_token = options[:access_token]
 
         @watching_users = options[:watching_users] || []

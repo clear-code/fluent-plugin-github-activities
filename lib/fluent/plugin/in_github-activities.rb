@@ -66,9 +66,10 @@ module Fluent
         crawler_options = {
           :access_token => @access_token,
           :watching_users => users,
-          :users_manager => users_manager,
           :include_commits_from_pull_request => @include_commits_from_pull_request,
           :include_foreign_commits => @include_foreign_commits,
+          :pos_file => @pos_file,
+          :request_queue => @request_queue,
           :default_interval => @interval,
         }
         @crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
