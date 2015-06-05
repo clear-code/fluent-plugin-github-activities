@@ -33,7 +33,6 @@ module Fluent
         @positions = {}
         @pos_file = params[:pos_file]
         @pos_file = Pathname(@pos_file) if @pos_file
-        load_positions
       end
 
       def generate_initial_requests
@@ -62,6 +61,7 @@ module Fluent
       end
 
       def position_for(user)
+        load_positions
         @positions[user]
       end
 
