@@ -110,6 +110,8 @@ module Fluent
         end
         @interval_for_next_request = @default_interval
         return true
+      rescue StandardError => error
+        $log.error(error.inspect)
       end
 
       def request_uri(request)
