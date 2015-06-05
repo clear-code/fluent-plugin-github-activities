@@ -60,8 +60,6 @@ module Fluent
       end
 
       def process_request
-        raise EmptyRequestQueue.new if @request_queue.empty?
-
         request = @request_queue.shift
         $log.debug("GithubActivities::Crawler: processing request: #{request.inspect}") if $log
         if request[:process_after] and
