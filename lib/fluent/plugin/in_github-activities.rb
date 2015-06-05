@@ -62,26 +62,26 @@ module Fluent
       end
 
       n_clients.times do
-      @client_threads << Thread.new do
-        crawler_options = {
-          :access_token => @access_token,
-          :watching_users => users,
-          :include_commits_from_pull_request => @include_commits_from_pull_request,
-          :include_foreign_commits => @include_foreign_commits,
-          :pos_file => @pos_file,
-          :request_queue => @request_queue,
-          :default_interval => @interval,
-        }
-        @crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
-        @crawler.on_emit = lambda do |tag, record|
-          Engine.emit("#{@base_tag}.#{tag}", Engine.now, record)
-        end
+        @client_threads << Thread.new do
+          crawler_options = {
+            :access_token => @access_token,
+            :watching_users => users,
+            :include_commits_from_pull_request => @include_commits_from_pull_request,
+            :include_foreign_commits => @include_foreign_commits,
+            :pos_file => @pos_file,
+            :request_queue => @request_queue,
+            :default_interval => @interval,
+          }
+          @crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
+          @crawler.on_emit = lambda do |tag, record|
+            Engine.emit("#{@base_tag}.#{tag}", Engine.now, record)
+          end
 
-        loop do
-          @crawler.process_request
-          sleep(@crawler.interval_for_next_request)
+          loop do
+            @crawler.process_request
+            sleep(@crawler.interval_for_next_request)
+          end
         end
-      end
       end
     end
 
