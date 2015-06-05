@@ -30,7 +30,7 @@ module Fluent
       class EmptyRequestQueue < StandardError
       end
 
-      MINIMUM_INTERVAL = 1
+      NO_INTERVAL = 0
       DEFAULT_INTERVAL = 1
 
       RELATED_USER_IMAGE_KEY = "$github-activities-related-avatar"
@@ -62,7 +62,7 @@ module Fluent
         if request[:process_after] and
              Time.now.to_i < request[:process_after]
           @request_queue.push(request)
-          @interval_for_next_request = MINIMUM_INTERVAL
+          @interval_for_next_request = NO_INTERVAL
           return false
         end
 
