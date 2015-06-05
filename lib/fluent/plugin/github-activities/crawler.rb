@@ -33,8 +33,6 @@ module Fluent
       NO_INTERVAL = 0
       DEFAULT_INTERVAL = 1
 
-      DEFAULT_LAST_EVENT_TIMESTAMP = -1
-
       RELATED_USER_IMAGE_KEY = "$github-activities-related-avatar"
       RELATED_ORGANIZATION_IMAGE_KEY = "$github-activities-related-organization-logo"
       RELATED_EVENT = "$github-activities-related-event"
@@ -143,7 +141,7 @@ module Fluent
       end
 
       def process_user_events(user, events)
-        last_event_timestamp = DEFAULT_LAST_EVENT_TIMESTAMP
+        last_event_timestamp = UsersManager::DEFAULT_LAST_EVENT_TIMESTAMP
         position = @users_manager.position_for(user)
         if position and position["last_event_timestamp"]
           last_event_timestamp = position["last_event_timestamp"]

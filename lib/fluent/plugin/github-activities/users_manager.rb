@@ -25,6 +25,8 @@ require "fluent/plugin/github-activities/safe_file_writer"
 module Fluent
   module GithubActivities
     class UsersManager
+      DEFAULT_LAST_EVENT_TIMESTAMP = -1
+
       def initialize(params={})
         @users = params[:users]
 
