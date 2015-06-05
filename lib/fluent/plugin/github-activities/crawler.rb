@@ -30,7 +30,7 @@ module Fluent
       class EmptyRequestQueue < StandardError
       end
 
-      NO_INTERVAL = 0
+      MINIMUM_INTERVAL = 1
       DEFAULT_INTERVAL = 1
 
       RELATED_USER_IMAGE_KEY = "$github-activities-related-avatar"
@@ -62,7 +62,7 @@ module Fluent
         if request[:process_after] and
              Time.now.to_i < request[:process_after]
           @request_queue.push(request)
-          @interval_for_next_request = NO_INTERVAL
+          @interval_for_next_request = MINIMUM_INTERVAL
           return false
         end
 
@@ -95,7 +95,7 @@ module Fluent
                                 :previous_response => response,
                                 :previous_entity_tag => extra_headers["If-None-Match"])
           end
-          @interval_for_next_request = NO_INTERVAL
+          @interval_for_next_request = MINIMUM_INTERVAL
           return true
         else
           $log.trace("GithubActivities::Crawler: UnknownType / request type: #{request[:type]}") if $log
