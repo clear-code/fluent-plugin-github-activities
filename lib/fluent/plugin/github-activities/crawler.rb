@@ -199,6 +199,8 @@ module Fluent
         else
           emit(event["type"], event)
         end
+      rescue StandardError => error
+        $log.exception(error)
       end
 
       def process_push_event(event)
