@@ -72,14 +72,14 @@ module Fluent
             :request_queue => @request_queue,
             :default_interval => @interval,
           }
-          @crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
-          @crawler.on_emit = lambda do |tag, record|
+          crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
+          crawler.on_emit = lambda do |tag, record|
             Engine.emit("#{@base_tag}.#{tag}", Engine.now, record)
           end
 
           loop do
-            @crawler.process_request
-            sleep(@crawler.interval_for_next_request)
+            crawler.process_request
+            sleep(crawler.interval_for_next_request)
           end
         end
       end
