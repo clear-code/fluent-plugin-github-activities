@@ -44,10 +44,18 @@ module Fluent
 
     def start
       @base_tag = @base_tag.sub(/\.\z/, "")
-      @thread = Thread.new do
+
+      users = prepare_users_list
+      n_clients = [@clients, users.size].min
+#      @interval = @interval * n_clients
+
+      @client_threads = []
+      @request_queue = Queue.new
+#      n_clients.times do
+      @client_threads << Thread.new do
         crawler_options = {
           :access_token => @access_token,
-          :watching_users => prepare_users_list,
+          :watching_users => users,
           :include_commits_from_pull_request => @include_commits_from_pull_request,
           :include_foreign_commits => @include_foreign_commits,
           :pos_file => @pos_file,
@@ -63,10 +71,11 @@ module Fluent
           sleep(@crawler.interval_for_next_request)
         end
       end
+#      end
     end
 
     def shutdown
-      @thread.exit
+      @client_threads.each(&:exit)
     end
 
     private
