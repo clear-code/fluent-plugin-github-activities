@@ -17,6 +17,7 @@
 # License along with fluent-plugin-github-activities.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+require "fluent/plugin/github-activities/users_manager"
 require "fluent/plugin/github-activities/crawler"
 
 module Fluent

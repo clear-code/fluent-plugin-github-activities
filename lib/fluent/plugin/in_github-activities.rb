@@ -51,14 +51,24 @@ module Fluent
 
       @client_threads = []
       @request_queue = Queue.new
+
+      users_manager_params = {
+        :users    => users,
+        :pos_file => @pos_file,
+      }
+      users_manager = ::Fluent::GithubActivities::UsersManager.new(users_manager_params)
+      users_manager.generate_initial_requests.each do |request|
+        @request_queue.push(request)
+      end
+
 #      n_clients.times do
       @client_threads << Thread.new do
         crawler_options = {
           :access_token => @access_token,
           :watching_users => users,
+          :users_manager => users_manager,
           :include_commits_from_pull_request => @include_commits_from_pull_request,
           :include_foreign_commits => @include_foreign_commits,
-          :pos_file => @pos_file,
           :default_interval => @interval,
         }
         @crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)

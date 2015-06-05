@@ -20,10 +20,7 @@
 require "uri"
 require "net/https"
 require "json"
-require "pathname"
 require "time"
-
-require "fluent/plugin/github-activities/safe_file_writer"
 
 module Fluent
   module GithubActivities
@@ -47,22 +44,14 @@ module Fluent
         @access_token = options[:access_token]
 
         @watching_users = options[:watching_users] || []
+        @users_manager = options[:users_manager]
 
         @include_commits_from_pull_request = options[:include_commits_from_pull_request]
         @include_foreign_commits = options[:include_foreign_commits]
 
-        @positions = {}
-        @pos_file = options[:pos_file]
-        @pos_file = Pathname(@pos_file) if @pos_file
-        load_positions
-
         @request_queue = options[:request_queue] || []
 
         @default_interval = options[:default_interval] || DEFAULT_INTERVAL
-
-        @watching_users.each do |user|
-          reserve_user_events(user)
-        end
       end
 
       def process_request
@@ -94,7 +83,9 @@ module Fluent
             $log.trace("GithubActivities::Crawler: events size: #{events.size}") if $log
             process_user_events(request[:user], events)
             reserve_user_events(request[:user], :previous_response => response)
-            save_user_position(request[:user], :entity_tag => response["ETag"])
+            if @users_manager
+              @users_manager.save_position_for(request[:user], :entity_tag => response["ETag"])
+            end
           when TYPE_COMMIT
             process_commit(body, request[:push])
           end
@@ -135,9 +126,12 @@ module Fluent
         headers = {}
         if request[:previous_entity_tag]
           headers["If-None-Match"] = request[:previous_entity_tag]
-        elsif request[:type] == TYPE_EVENTS and @positions[request[:user]]
-          entity_tag = @positions[request[:user]]["entity_tag"]
+        elsif @users_manager and request[:type] == TYPE_EVENTS
+          position = @users_manager.position_for(request[:user])
+          if position
+          entity_tag = position["entity_tag"]
           headers["If-None-Match"] = entity_tag if entity_tag
+          end
         end
         headers
       end
@@ -161,9 +155,13 @@ module Fluent
 
       def process_user_events(user, events)
         last_event_timestamp = DEFAULT_LAST_EVENT_TIMESTAMP
-        if @positions[user] and @positions[user]["last_event_timestamp"]
-          last_event_timestamp = @positions[user]["last_event_timestamp"]
+        if @users_manager
+          position = @users_manager.position_for(user)
+          if position and position["last_event_timestamp"]
+            last_event_timestamp = position["last_event_timestamp"]
+          end
         end
+
         events = events.sort do |a, b|
           b["created_at"] <=> a["created_at"]
         end
@@ -171,7 +169,9 @@ module Fluent
           timestamp = Time.parse(event["created_at"]).to_i
           next if timestamp <= last_event_timestamp
           process_user_event(user, event)
-          save_user_position(user, :last_event_timestamp => timestamp)
+          if @users_manager
+            @users_manager.save_position_for(user, :last_event_timestamp => timestamp)
+          end
         end
       end
 
@@ -344,38 +344,6 @@ module Fluent
           response = http.request(http_request)
         end
         response
-      end
-
-      def load_positions
-        return unless @pos_file
-        return unless @pos_file.exist?
-
-        @positions = JSON.parse(@pos_file.read)
-      rescue
-        @positions = {}
-      end
-
-      def save_positions
-        return unless @pos_file
-        SafeFileWriter.write(@pos_file, JSON.pretty_generate(@positions))
-      end
-
-      def save_user_position(user, params)
-        @positions[user] ||= {}
-
-        if params[:entity_tag]
-          @positions[user]["entity_tag"] = params[:entity_tag]
-        end
-
-        if params[:last_event_timestamp] and
-             params[:last_event_timestamp] != DEFAULT_LAST_EVENT_TIMESTAMP
-          old_timestamp = @positions[user]["last_event_timestamp"]
-          if old_timestamp.nil? or old_timestamp < params[:last_event_timestamp]
-            @positions[user]["last_event_timestamp"] = params[:last_event_timestamp]
-          end
-        end
-
-        save_positions
       end
     end
   end
