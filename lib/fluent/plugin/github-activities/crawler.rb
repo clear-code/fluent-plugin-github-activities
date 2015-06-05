@@ -132,8 +132,8 @@ module Fluent
         elsif request[:type] == TYPE_EVENTS
           position = @users_manager.position_for(request[:user])
           if position
-          entity_tag = position["entity_tag"]
-          headers["If-None-Match"] = entity_tag if entity_tag
+            entity_tag = position["entity_tag"]
+            headers["If-None-Match"] = entity_tag if entity_tag
           end
         end
         headers
