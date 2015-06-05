@@ -47,7 +47,6 @@ module Fluent
         @access_token = options[:access_token]
 
         @watching_users = options[:watching_users] || []
-        @users_manager = options[:users_manager]
 
         @include_commits_from_pull_request = options[:include_commits_from_pull_request]
         @include_foreign_commits = options[:include_foreign_commits]
