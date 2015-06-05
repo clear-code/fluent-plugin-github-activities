@@ -1,6 +1,6 @@
 # News
 
-## 0.5.0: 2015-06-06 (planned)
+## 0.5.0: 2015-06-06
 
  * Parallel crawling is land.
  * Reports related push event as a part of commit event.
