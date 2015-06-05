@@ -88,6 +88,9 @@ Then the value of the `token` field is the access key to be written to the confi
   # Interval seconds for requests. This is `1` by default.
   interval 1
 
+  # Number of clients. This is `4` by default.
+  clients 1
+
   # Path to a file to store timestamp of last crawled activity
   # for each user. If you don't specify this option, same records
   # can be forwarded after the fluentd is restarted.
