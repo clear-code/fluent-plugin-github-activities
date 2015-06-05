@@ -95,7 +95,7 @@ module Fluent
                                 :previous_response => response,
                                 :previous_entity_tag => extra_headers["If-None-Match"])
           end
-          @interval_for_next_request = MINIMUM_INTERVAL
+          @interval_for_next_request = @default_interval
           return true
         else
           $log.trace("GithubActivities::Crawler: UnknownType / request type: #{request[:type]}") if $log
