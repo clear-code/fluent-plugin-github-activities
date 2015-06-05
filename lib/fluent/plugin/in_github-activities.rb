@@ -47,7 +47,7 @@ module Fluent
 
       users = prepare_users_list
       n_clients = [@clients, users.size].min
-#      @interval = @interval * n_clients
+      @interval = @interval * n_clients
 
       @client_threads = []
       @request_queue = Queue.new
@@ -61,7 +61,7 @@ module Fluent
         @request_queue.push(request)
       end
 
-#      n_clients.times do
+      n_clients.times do
       @client_threads << Thread.new do
         crawler_options = {
           :access_token => @access_token,
@@ -82,7 +82,7 @@ module Fluent
           sleep(@crawler.interval_for_next_request)
         end
       end
-#      end
+      end
     end
 
     def shutdown
