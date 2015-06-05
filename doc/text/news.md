@@ -1,5 +1,11 @@
 # News
 
+## 0.5.0: 2015-06-06 (planned)
+
+ * Parallel crawling is land.
+ * Reports related push event as a part of commit event.
+ * Applies configured interval always.
+
 ## 0.4.0: 2015-06-02
 
  * Uses OAuth access token correctly.
