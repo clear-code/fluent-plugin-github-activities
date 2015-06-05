@@ -135,19 +135,7 @@ module Fluent
       end
 
       def reserve_user_events(user, options={})
-        request = {
-          :type => TYPE_EVENTS,
-          :user => user,
-        }
-        response = options[:previous_response]
-        if response
-          now = options[:now] || Time.now
-          interval = response["X-Poll-Interval"].to_i
-          time_to_process = now.to_i + interval
-          request[:previous_entity_tag] = response["ETag"] ||
-                                            options[:previous_entity_tag]
-          request[:process_after] = time_to_process
-        end
+        request = @users_manager.new_events_request(user, options)
         @request_queue.push(request)
       end
 
