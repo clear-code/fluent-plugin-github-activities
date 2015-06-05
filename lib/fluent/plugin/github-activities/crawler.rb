@@ -75,8 +75,8 @@ module Fluent
 
         case response
         when Net::HTTPSuccess
+          $log.trace("GithubActivities::Crawler: Net::HTTPSuccess / request type: #{request[:type]}") if $log
           body = JSON.parse(response.body)
-          $log.trace("GithubActivities::Crawler: request type: #{request[:type]}") if $log
           case request[:type]
           when TYPE_EVENTS
             events = body
@@ -88,6 +88,7 @@ module Fluent
             process_commit(body, request[:push])
           end
         when Net::HTTPNotModified
+          $log.trace("GithubActivities::Crawler: Net::HTTPNotModified / request type: #{request[:type]}") if $log
           case request[:type]
           when TYPE_EVENTS
             reserve_user_events(request[:user],
@@ -96,7 +97,8 @@ module Fluent
           end
           @interval_for_next_request = NO_INTERVAL
           return true
-        when Net::HTTPNotFound
+        else
+          $log.trace("GithubActivities::Crawler: UnknownType / request type: #{request[:type]}") if $log
           case request[:type]
           when TYPE_COMMIT
             fake_body = {
