@@ -210,9 +210,9 @@ module Fluent
         end
         commit_refs.reverse.each do |commit_ref|
           @request_queue.push(:type => TYPE_COMMIT,
-                                 :uri  => commit_ref["url"],
-                                 :sha  => commit_ref["sha"],
-                                 :push => event)
+                              :uri  => commit_ref["url"],
+                              :sha  => commit_ref["sha"],
+                              :push => event)
         end
         # emit("push", event)
       end
