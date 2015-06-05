@@ -83,9 +83,7 @@ module Fluent
             $log.trace("GithubActivities::Crawler: events size: #{events.size}") if $log
             process_user_events(request[:user], events)
             reserve_user_events(request[:user], :previous_response => response)
-            if @users_manager
-              @users_manager.save_position_for(request[:user], :entity_tag => response["ETag"])
-            end
+            @users_manager.save_position_for(request[:user], :entity_tag => response["ETag"])
           when TYPE_COMMIT
             process_commit(body, request[:push])
           end
@@ -126,7 +124,7 @@ module Fluent
         headers = {}
         if request[:previous_entity_tag]
           headers["If-None-Match"] = request[:previous_entity_tag]
-        elsif @users_manager and request[:type] == TYPE_EVENTS
+        elsif request[:type] == TYPE_EVENTS
           position = @users_manager.position_for(request[:user])
           if position
           entity_tag = position["entity_tag"]
@@ -155,11 +153,9 @@ module Fluent
 
       def process_user_events(user, events)
         last_event_timestamp = DEFAULT_LAST_EVENT_TIMESTAMP
-        if @users_manager
-          position = @users_manager.position_for(user)
-          if position and position["last_event_timestamp"]
-            last_event_timestamp = position["last_event_timestamp"]
-          end
+        position = @users_manager.position_for(user)
+        if position and position["last_event_timestamp"]
+          last_event_timestamp = position["last_event_timestamp"]
         end
 
         events = events.sort do |a, b|
@@ -169,9 +165,7 @@ module Fluent
           timestamp = Time.parse(event["created_at"]).to_i
           next if timestamp <= last_event_timestamp
           process_user_event(user, event)
-          if @users_manager
-            @users_manager.save_position_for(user, :last_event_timestamp => timestamp)
-          end
+          @users_manager.save_position_for(user, :last_event_timestamp => timestamp)
         end
       end
 
