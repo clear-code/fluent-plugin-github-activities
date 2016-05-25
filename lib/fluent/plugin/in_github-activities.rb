@@ -74,7 +74,7 @@ module Fluent
           }
           crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
           crawler.on_emit = lambda do |tag, record|
-            Engine.emit("#{@base_tag}.#{tag}", Engine.now, record)
+            router.emit("#{@base_tag}.#{tag}", Engine.now, record)
           end
 
           loop do
