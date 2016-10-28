@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
   spec.summary = "Fluentd plugin to crawl public activities on the GitHub."
   spec.description = "This provides ability to crawl public " +
                        "activities of users."
-  spec.homepage = "https://github.com/groonga/fluent-plugin-groonga"
+  spec.homepage = "https://github.com/clear-code/fluent-plugin-github-activities"
   spec.license = "LGPL-3.0"
 
   spec.files = ["README.md", "Gemfile", "#{spec.name}.gemspec"]
