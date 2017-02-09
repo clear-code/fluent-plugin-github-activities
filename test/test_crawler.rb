@@ -233,7 +233,7 @@ class CrawlerTest < Test::Unit::TestCase
             :uri  => "#{base}/c908f319c7b6d5c5a69c8b675bde40dd990ee364",
             :sha  => "c908f319c7b6d5c5a69c8b675bde40dd990ee364",
             :push => expected_push },
-        ],
+        ].reverse,
         :emitted_records => [
         ],
       }
