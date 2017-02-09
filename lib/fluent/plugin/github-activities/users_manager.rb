@@ -55,7 +55,7 @@ module Fluent
                                             options[:previous_entity_tag]
           request[:process_after] = time_to_process
         else
-          request[:previous_entity_tag] = options[:previous_entity_tag]
+          request[:previous_entity_tag] = options[:previous_entity_tag] if options.key?(:previous_entity_tag)
         end
         request
       end
