@@ -44,6 +44,13 @@ class CrawlerTest < Test::Unit::TestCase
   end
 
   def fill_extra_fields(event, parent_event=nil)
+    if parent_event && parent_event["type"] == "PushEvent"
+      push_event = fill_extra_fields(parent_event)
+      event = event.merge(
+        "$github-activities-related-event" => push_event
+      )
+    end
+
     parent_event ||= event
 
     event = event.merge(
