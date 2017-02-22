@@ -85,10 +85,9 @@ module Fluent
       end
 
       private
-      def prepare_users_list
-        @users ||= ""
-        users = @users.split(",")
 
+      def load_users_list
+        users = []
         if @users_list
           users_list = Pathname(@users_list)
           if users_list.exist?
