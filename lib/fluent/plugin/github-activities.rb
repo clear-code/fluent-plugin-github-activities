@@ -22,9 +22,9 @@ require "fluent/plugin/github-activities/crawler"
 
 module Fluent
   module Plugin
-  module GithubActivities
-    TYPE_EVENTS = :events
-    TYPE_COMMIT = :commit
-  end
+    module GithubActivities
+      TYPE_EVENTS = :events
+      TYPE_COMMIT = :commit
+    end
   end
 end

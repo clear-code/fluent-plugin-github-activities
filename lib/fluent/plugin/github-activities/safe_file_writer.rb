@@ -23,26 +23,26 @@ require "tempfile"
 
 module Fluent
   module Plugin
-  module GithubActivities
-    class SafeFileWriter
-      class << self
-        def write(path, contents=nil)
-          # Don't output the file directly to prevent loading of incomplete file!
-          path = Pathname(path).expand_path
-          FileUtils.mkdir_p(path.dirname.to_s)
-          Tempfile.open(path.basename.to_s, path.dirname.to_s) do |output|
-            if block_given?
-              yield(output, output.path)
-            else
-              output.write(contents)
+    module GithubActivities
+      class SafeFileWriter
+        class << self
+          def write(path, contents=nil)
+            # Don't output the file directly to prevent loading of incomplete file!
+            path = Pathname(path).expand_path
+            FileUtils.mkdir_p(path.dirname.to_s)
+            Tempfile.open(path.basename.to_s, path.dirname.to_s) do |output|
+              if block_given?
+                yield(output, output.path)
+              else
+                output.write(contents)
+              end
+              output.flush
+              File.rename(output.path, path.to_s)
             end
-            output.flush
-            File.rename(output.path, path.to_s)
           end
         end
       end
     end
-  end
   end
 end
 
