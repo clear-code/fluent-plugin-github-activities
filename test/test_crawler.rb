@@ -25,7 +25,7 @@ class CrawlerTest < Test::Unit::TestCase
   def setup
     @emitted_records = []
 
-    @crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
+    @crawler = ::Fluent::Plugin::GithubActivities::Crawler.new(crawler_options)
     @crawler.on_emit = lambda do |tag, record|
       @emitted_records << { tag: tag,
                             record: record }
@@ -187,7 +187,7 @@ class CrawlerTest < Test::Unit::TestCase
       expected_push = fill_extra_fields(expected_push)
       expected = {
         request_queue: [
-          { type: ::Fluent::GithubActivities::TYPE_COMMIT,
+          { type: ::Fluent::Plugin::GithubActivities::TYPE_COMMIT,
             uri: "#{base}/8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
             sha: "8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
             push: expected_push },
@@ -214,23 +214,23 @@ class CrawlerTest < Test::Unit::TestCase
       expected_push = fill_extra_fields(expected_push)
       expected = {
         request_queue: [
-          { type: ::Fluent::GithubActivities::TYPE_COMMIT,
+          { type: ::Fluent::Plugin::GithubActivities::TYPE_COMMIT,
             uri: "#{base}/c908f319c7b6d5c5a69c8b675bde40dd990ee364",
             sha: "c908f319c7b6d5c5a69c8b675bde40dd990ee364",
             push: expected_push },
-          { type: ::Fluent::GithubActivities::TYPE_COMMIT,
+          { type: ::Fluent::Plugin::GithubActivities::TYPE_COMMIT,
             uri: "#{base}/8ce6de7582376187e17e233dbae13575311a8c0b",
             sha: "8ce6de7582376187e17e233dbae13575311a8c0b",
             push: expected_push },
-          { type: ::Fluent::GithubActivities::TYPE_COMMIT,
+          { type: ::Fluent::Plugin::GithubActivities::TYPE_COMMIT,
             uri: "#{base}/c85e33bace040b7b42983e14d2b11a491d102072",
             sha: "c85e33bace040b7b42983e14d2b11a491d102072",
             push: expected_push },
-          { type: ::Fluent::GithubActivities::TYPE_COMMIT,
+          { type: ::Fluent::Plugin::GithubActivities::TYPE_COMMIT,
             uri: "#{base}/63e085b7607a3043cfbf9a866561807fbdda8a10",
             sha: "63e085b7607a3043cfbf9a866561807fbdda8a10",
             push: expected_push },
-          { type: ::Fluent::GithubActivities::TYPE_COMMIT,
+          { type: ::Fluent::Plugin::GithubActivities::TYPE_COMMIT,
             uri: "#{base}/8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
             sha: "8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
             push: expected_push },

@@ -25,6 +25,7 @@ require "time"
 require "fluent/plugin/github-activities/users_manager"
 
 module Fluent
+  module Plugin
   module GithubActivities
     class Crawler
       class EmptyRequestQueue < StandardError
@@ -332,5 +333,6 @@ module Fluent
         response
       end
     end
+  end
   end
 end

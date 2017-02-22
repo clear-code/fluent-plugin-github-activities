@@ -55,7 +55,7 @@ module Fluent
           users: users,
           pos_file: @pos_file,
         }
-        users_manager = ::Fluent::GithubActivities::UsersManager.new(users_manager_params)
+        users_manager = ::Fluent::Plugin::GithubActivities::UsersManager.new(users_manager_params)
         users_manager.generate_initial_requests.each do |request|
           @request_queue.push(request)
         end
@@ -71,7 +71,7 @@ module Fluent
               request_queue: @request_queue,
               default_interval: @interval,
             }
-            crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
+            crawler = ::Fluent::Plugin::GithubActivities::Crawler.new(crawler_options)
             crawler.on_emit = lambda do |tag, record|
               router.emit("#{@base_tag}.#{tag}", Engine.now, record)
             end

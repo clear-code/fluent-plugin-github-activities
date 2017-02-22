@@ -23,6 +23,7 @@ require "json"
 require "fluent/plugin/github-activities/safe_file_writer"
 
 module Fluent
+  module Plugin
   module GithubActivities
     class UsersManager
       DEFAULT_LAST_EVENT_TIMESTAMP = -1
@@ -99,5 +100,6 @@ module Fluent
         SafeFileWriter.write(@pos_file, JSON.pretty_generate(@positions))
       end
     end
+  end
   end
 end

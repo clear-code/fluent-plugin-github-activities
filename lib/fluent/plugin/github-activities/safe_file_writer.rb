@@ -22,6 +22,7 @@ require "fileutils"
 require "tempfile"
 
 module Fluent
+  module Plugin
   module GithubActivities
     class SafeFileWriter
       class << self
@@ -41,6 +42,7 @@ module Fluent
         end
       end
     end
+  end
   end
 end
 
