@@ -24,11 +24,11 @@ require "fluent/plugin/github-activities"
 
 module Fluent
   module Plugin
-    class GithubActivitiesInput < Input
+    class GithubActivitiesInput < Fluent::Plugin::Input
       DEFAULT_BASE_TAG = "github-activity"
       DEFAULT_CLIENTS = 4
 
-      Plugin.register_input("github-activities", self)
+      Fluent::Plugin.register_input("github-activities", self)
 
       config_param :access_token, :string, default: nil, secret: true
       config_param :users, :string, default: nil
