@@ -80,7 +80,7 @@ Then the value of the `token` field is the access key to be written to the confi
 
 ~~~
 <source>
-  type github-activities
+  @type github-activities
 
   # Access token for this instance. See also the previous section.
   access_token access-token-for-this-instance
