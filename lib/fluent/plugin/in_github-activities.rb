@@ -23,6 +23,7 @@ require "fluent/plugin/input"
 require "fluent/plugin/github-activities"
 
 module Fluent
+  module Plugin
   class GithubActivitiesInput < Input
     DEFAULT_BASE_TAG = "github-activity"
     DEFAULT_CLIENTS = 4
@@ -107,5 +108,6 @@ module Fluent
 
       users
     end
+  end
   end
 end
