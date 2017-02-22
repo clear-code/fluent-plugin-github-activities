@@ -33,7 +33,7 @@ module Fluent
       Fluent::Plugin.register_input("github-activities", self)
 
       config_param :access_token, :string, default: nil, secret: true
-      config_param :users, :string, default: nil
+      config_param :users, :array, default: []
       config_param :users_list, :string, default: nil
       config_param :include_commits_from_pull_request, :bool, default: false
       config_param :include_foreign_commits, :bool, default: false
