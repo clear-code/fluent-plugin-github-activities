@@ -17,6 +17,11 @@
 # License along with fluent-plugin-github-activities.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+require "thread"
+require "pathname"
+require "fluent/plugin/input"
+require "fluent/plugin/github-activities"
+
 module Fluent
   class GithubActivitiesInput < Input
     DEFAULT_BASE_TAG = "github-activity"
@@ -33,14 +38,6 @@ module Fluent
     config_param :pos_file, :string, default: nil
     config_param :clients, :integer, default: DEFAULT_CLIENTS
     config_param :interval, :integer, default: 1
-
-    def initialize
-      super
-
-      require "thread"
-      require "pathname"
-      require "fluent/plugin/github-activities"
-    end
 
     def start
       @base_tag = @base_tag.sub(/\.\z/, "")
