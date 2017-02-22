@@ -42,17 +42,22 @@ module Fluent
       config_param :clients, :integer, default: DEFAULT_CLIENTS
       config_param :interval, :integer, default: 1
 
-      def start
-        @base_tag = @base_tag.sub(/\.\z/, "")
+      def configure(conf)
+        super
 
-        users = prepare_users_list
-        n_clients = [@clients, users.size].min
+        @base_tag = @base_tag.sub(/\.\z/, "")
+        @users += load_users_list
+        n_clients = [@clients, @users.size].min
         @interval = @interval * n_clients
+      end
+
+      def start
+        super
 
         @request_queue = Queue.new
 
         users_manager_params = {
-          users: users,
+          users: @users,
           pos_file: @pos_file,
         }
         users_manager = ::Fluent::Plugin::GithubActivities::UsersManager.new(users_manager_params)
@@ -64,7 +69,7 @@ module Fluent
           thread_create("in_github_activity_#{n}".to_sym) do
             crawler_options = {
               access_token: @access_token,
-              watching_users: users,
+              watching_users: @users,
               include_commits_from_pull_request: @include_commits_from_pull_request,
               include_foreign_commits: @include_foreign_commits,
               pos_file: @pos_file,
