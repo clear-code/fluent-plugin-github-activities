@@ -47,8 +47,8 @@ module Fluent
 
         @base_tag = @base_tag.sub(/\.\z/, "")
         @users += load_users_list
-        n_clients = [@clients, @users.size].min
-        @interval = @interval * n_clients
+        @n_clients = [@clients, @users.size].min
+        @interval = @interval * @n_clients
       end
 
       def start
@@ -64,8 +64,7 @@ module Fluent
         users_manager.generate_initial_requests.each do |request|
           @request_queue.push(request)
         end
-
-        n_clients.times do |n|
+        @n_clients.times do |n|
           thread_create("in_github_activity_#{n}".to_sym) do
             crawler_options = {
               access_token: @access_token,
