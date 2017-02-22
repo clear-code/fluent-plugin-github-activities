@@ -43,8 +43,8 @@ module Fluent
 
       def new_events_request(user, options={})
         request = {
-          :type => TYPE_EVENTS,
-          :user => user,
+          type: TYPE_EVENTS,
+          user: user,
         }
         response = options[:previous_response]
         if response

@@ -41,8 +41,8 @@ module Fluent
       attr_reader :request_queue, :interval_for_next_request
 
       def initialize(options={})
-        @users_manager = UsersManager.new(:users    => options[:watching_users],
-                                          :pos_file => options[:pos_file])
+        @users_manager = UsersManager.new(users: options[:watching_users],
+                                          pos_file: options[:pos_file])
 
         @access_token = options[:access_token]
 
@@ -82,8 +82,8 @@ module Fluent
             events = body
             $log.trace("GithubActivities::Crawler: events size: #{events.size}") if $log
             process_user_events(request[:user], events)
-            reserve_user_events(request[:user], :previous_response => response)
-            @users_manager.save_position_for(request[:user], :entity_tag => response["ETag"])
+            reserve_user_events(request[:user], previous_response: response)
+            @users_manager.save_position_for(request[:user], entity_tag: response["ETag"])
           when TYPE_COMMIT
             process_commit(body, request[:push])
           end
@@ -92,8 +92,8 @@ module Fluent
           case request[:type]
           when TYPE_EVENTS
             reserve_user_events(request[:user],
-                                :previous_response => response,
-                                :previous_entity_tag => extra_headers["If-None-Match"])
+                                previous_response: response,
+                                previous_entity_tag: extra_headers["If-None-Match"])
           end
           @interval_for_next_request = @default_interval
           return true
@@ -157,7 +157,7 @@ module Fluent
           timestamp = Time.parse(event["created_at"]).to_i
           next if timestamp <= last_event_timestamp
           process_user_event(user, event)
-          @users_manager.save_position_for(user, :last_event_timestamp => timestamp)
+          @users_manager.save_position_for(user, last_event_timestamp: timestamp)
         end
       end
 
@@ -197,10 +197,10 @@ module Fluent
           return
         end
         commit_refs.reverse.each do |commit_ref|
-          @request_queue.push(:type => TYPE_COMMIT,
-                              :uri  => commit_ref["url"],
-                              :sha  => commit_ref["sha"],
-                              :push => event)
+          @request_queue.push(type: TYPE_COMMIT,
+                              uri: commit_ref["url"],
+                              sha: commit_ref["sha"],
+                              push: event)
         end
         # emit("push", event)
       end

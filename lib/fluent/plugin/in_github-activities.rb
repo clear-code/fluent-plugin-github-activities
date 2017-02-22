@@ -24,15 +24,15 @@ module Fluent
 
     Plugin.register_input("github-activities", self)
 
-    config_param :access_token, :string, :default => nil, :secret => true
-    config_param :users, :string, :default => nil
-    config_param :users_list, :string, :default => nil
-    config_param :include_commits_from_pull_request, :bool, :default => false
-    config_param :include_foreign_commits, :bool, :default => false
-    config_param :base_tag, :string, :default => DEFAULT_BASE_TAG
-    config_param :pos_file, :string, :default => nil
-    config_param :clients, :integer, :default => DEFAULT_CLIENTS
-    config_param :interval, :integer, :default => 1
+    config_param :access_token, :string, default: nil, secret: true
+    config_param :users, :string, default: nil
+    config_param :users_list, :string, default: nil
+    config_param :include_commits_from_pull_request, :bool, default: false
+    config_param :include_foreign_commits, :bool, default: false
+    config_param :base_tag, :string, default: DEFAULT_BASE_TAG
+    config_param :pos_file, :string, default: nil
+    config_param :clients, :integer, default: DEFAULT_CLIENTS
+    config_param :interval, :integer, default: 1
 
     def initialize
       super
@@ -53,8 +53,8 @@ module Fluent
       @request_queue = Queue.new
 
       users_manager_params = {
-        :users    => users,
-        :pos_file => @pos_file,
+        users: users,
+        pos_file: @pos_file,
       }
       users_manager = ::Fluent::GithubActivities::UsersManager.new(users_manager_params)
       users_manager.generate_initial_requests.each do |request|
@@ -64,13 +64,13 @@ module Fluent
       n_clients.times do
         @client_threads << Thread.new do
           crawler_options = {
-            :access_token => @access_token,
-            :watching_users => users,
-            :include_commits_from_pull_request => @include_commits_from_pull_request,
-            :include_foreign_commits => @include_foreign_commits,
-            :pos_file => @pos_file,
-            :request_queue => @request_queue,
-            :default_interval => @interval,
+            access_token: @access_token,
+            watching_users: users,
+            include_commits_from_pull_request: @include_commits_from_pull_request,
+            include_foreign_commits: @include_foreign_commits,
+            pos_file: @pos_file,
+            request_queue: @request_queue,
+            default_interval: @interval,
           }
           crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
           crawler.on_emit = lambda do |tag, record|

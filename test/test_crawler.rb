@@ -27,17 +27,17 @@ class CrawlerTest < Test::Unit::TestCase
 
     @crawler = ::Fluent::GithubActivities::Crawler.new(crawler_options)
     @crawler.on_emit = lambda do |tag, record|
-      @emitted_records << { :tag    => tag,
-                            :record => record }
+      @emitted_records << { tag: tag,
+                            record: record }
     end
     @crawler.request_queue.clear
   end
 
   def crawler_options
     {
-      :include_commits_from_pull_request => false,
-      :include_foreign_commits => false,
-      :watching_users => [
+      include_commits_from_pull_request: false,
+      include_foreign_commits: false,
+      watching_users: [
         'piroor',
       ],
     }
@@ -68,19 +68,19 @@ class CrawlerTest < Test::Unit::TestCase
   end
 
   REQUEST_PATTERNS = {
-    :user_events => {
-      :request => { :type => :events,
-                    :user => "username" },
-      :uri     => "https://api.github.com/users/username/events/public",
-      :headers => {},
+    user_events: {
+      request: { type: :events,
+                    user: "username" },
+      uri: "https://api.github.com/users/username/events/public",
+      headers: {},
     },
-    :user_events_with_previous_request => {
-      :request => { :type => :events,
-                    :user => "username",
-                    :previous_entity_tag => "aaaaa",
-                    :process_after => 29 },
-      :uri     => "https://api.github.com/users/username/events/public",
-      :headers => {
+    user_events_with_previous_request: {
+      request: { type: :events,
+                    user: "username",
+                    previous_entity_tag: "aaaaa",
+                    process_after: 29 },
+      uri: "https://api.github.com/users/username/events/public",
+      headers: {
         "If-None-Match" => "aaaaa",
       },
     },
@@ -102,10 +102,10 @@ class CrawlerTest < Test::Unit::TestCase
     def test_without_previous_response
       now = Time.now
       @crawler.reserve_user_events("username",
-                                   :now => now)
+                                   now: now)
       expected_request = {
-        :type => :events,
-        :user => "username",
+        type: :events,
+        user: "username",
       }
       assert_equal([expected_request],
                    @crawler.request_queue)
@@ -114,16 +114,16 @@ class CrawlerTest < Test::Unit::TestCase
     def test_with_previous_response
       now = Time.now
       @crawler.reserve_user_events("username",
-                                   :now => now,
-                                   :previous_response => {
+                                   now: now,
+                                   previous_response: {
                                      "ETag" => "aaaaa",
                                      "X-Poll-Interval" => 60,
                                    })
       expected_request = {
-        :type => :events,
-        :user => "username",
-        :previous_entity_tag => "aaaaa",
-        :process_after => now.to_i + 60,
+        type: :events,
+        user: "username",
+        previous_entity_tag: "aaaaa",
+        process_after: now.to_i + 60,
       }
       assert_equal([expected_request],
                    @crawler.request_queue)
@@ -139,15 +139,15 @@ class CrawlerTest < Test::Unit::TestCase
       }
       @crawler.process_user_event("username", event)
       expected = {
-        :request_queue => [],
-        :emitted_records => [
-          { :tag    => "test",
-            :record => fill_extra_fields(event) },
+        request_queue: [],
+        emitted_records: [
+          { tag: "test",
+            record: fill_extra_fields(event) },
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @crawler.request_queue,
-                     :emitted_records => @emitted_records })
+                   { request_queue: @crawler.request_queue,
+                     emitted_records: @emitted_records })
     end
   end
 
@@ -160,15 +160,15 @@ class CrawlerTest < Test::Unit::TestCase
       }
       @crawler.process_user_events("username", [event])
       expected = {
-        :request_queue => [],
-        :emitted_records => [
-          { :tag    => "test",
-            :record => fill_extra_fields(event) },
+        request_queue: [],
+        emitted_records: [
+          { tag: "test",
+            record: fill_extra_fields(event) },
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @crawler.request_queue,
-                     :emitted_records => @emitted_records })
+                   { request_queue: @crawler.request_queue,
+                     emitted_records: @emitted_records })
     end
   end
 
@@ -186,18 +186,18 @@ class CrawlerTest < Test::Unit::TestCase
 
       expected_push = fill_extra_fields(expected_push)
       expected = {
-        :request_queue => [
-          { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
-            :uri  => "#{base}/8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
-            :sha  => "8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
-            :push => expected_push },
+        request_queue: [
+          { type: ::Fluent::GithubActivities::TYPE_COMMIT,
+            uri: "#{base}/8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+            sha: "8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+            push: expected_push },
         ],
-        :emitted_records => [
+        emitted_records: [
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @crawler.request_queue,
-                     :emitted_records => @emitted_records })
+                   { request_queue: @crawler.request_queue,
+                     emitted_records: @emitted_records })
     end
 
     def test_multiple_commits
@@ -213,34 +213,34 @@ class CrawlerTest < Test::Unit::TestCase
 
       expected_push = fill_extra_fields(expected_push)
       expected = {
-        :request_queue => [
-          { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
-            :uri  => "#{base}/c908f319c7b6d5c5a69c8b675bde40dd990ee364",
-            :sha  => "c908f319c7b6d5c5a69c8b675bde40dd990ee364",
-            :push => expected_push },
-          { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
-            :uri  => "#{base}/8ce6de7582376187e17e233dbae13575311a8c0b",
-            :sha  => "8ce6de7582376187e17e233dbae13575311a8c0b",
-            :push => expected_push },
-          { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
-            :uri  => "#{base}/c85e33bace040b7b42983e14d2b11a491d102072",
-            :sha  => "c85e33bace040b7b42983e14d2b11a491d102072",
-            :push => expected_push },
-          { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
-            :uri  => "#{base}/63e085b7607a3043cfbf9a866561807fbdda8a10",
-            :sha  => "63e085b7607a3043cfbf9a866561807fbdda8a10",
-            :push => expected_push },
-          { :type => ::Fluent::GithubActivities::TYPE_COMMIT,
-            :uri  => "#{base}/8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
-            :sha  => "8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
-            :push => expected_push },
+        request_queue: [
+          { type: ::Fluent::GithubActivities::TYPE_COMMIT,
+            uri: "#{base}/c908f319c7b6d5c5a69c8b675bde40dd990ee364",
+            sha: "c908f319c7b6d5c5a69c8b675bde40dd990ee364",
+            push: expected_push },
+          { type: ::Fluent::GithubActivities::TYPE_COMMIT,
+            uri: "#{base}/8ce6de7582376187e17e233dbae13575311a8c0b",
+            sha: "8ce6de7582376187e17e233dbae13575311a8c0b",
+            push: expected_push },
+          { type: ::Fluent::GithubActivities::TYPE_COMMIT,
+            uri: "#{base}/c85e33bace040b7b42983e14d2b11a491d102072",
+            sha: "c85e33bace040b7b42983e14d2b11a491d102072",
+            push: expected_push },
+          { type: ::Fluent::GithubActivities::TYPE_COMMIT,
+            uri: "#{base}/63e085b7607a3043cfbf9a866561807fbdda8a10",
+            sha: "63e085b7607a3043cfbf9a866561807fbdda8a10",
+            push: expected_push },
+          { type: ::Fluent::GithubActivities::TYPE_COMMIT,
+            uri: "#{base}/8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+            sha: "8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+            push: expected_push },
         ],
-        :emitted_records => [
+        emitted_records: [
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @crawler.request_queue,
-                     :emitted_records => @emitted_records })
+                   { request_queue: @crawler.request_queue,
+                     emitted_records: @emitted_records })
     end
   end
 
@@ -249,15 +249,15 @@ class CrawlerTest < Test::Unit::TestCase
       event = JSON.parse(fixture_data("issues-event.json"))
       @crawler.process_user_event("user", event)
       expected = {
-        :request_queue => [],
-        :emitted_records => [
-          { :tag    => "issue-open",
-            :record => fill_extra_fields(event) }
+        request_queue: [],
+        emitted_records: [
+          { tag: "issue-open",
+            record: fill_extra_fields(event) }
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @crawler.request_queue,
-                     :emitted_records => @emitted_records })
+                   { request_queue: @crawler.request_queue,
+                     emitted_records: @emitted_records })
     end
   end
 
@@ -266,15 +266,15 @@ class CrawlerTest < Test::Unit::TestCase
       event = JSON.parse(fixture_data("issue-comment-event.json"))
       @crawler.process_user_event("user", event)
       expected = {
-        :request_queue => [],
-        :emitted_records => [
-          { :tag    => "issue-comment",
-            :record => fill_extra_fields(event) }
+        request_queue: [],
+        emitted_records: [
+          { tag: "issue-comment",
+            record: fill_extra_fields(event) }
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @crawler.request_queue,
-                     :emitted_records => @emitted_records })
+                   { request_queue: @crawler.request_queue,
+                     emitted_records: @emitted_records })
     end
   end
 
@@ -283,15 +283,15 @@ class CrawlerTest < Test::Unit::TestCase
       event = JSON.parse(fixture_data("commit-comment-event.json"))
       @crawler.process_user_event("user", event)
       expected = {
-        :request_queue => [],
-        :emitted_records => [
-          { :tag    => "commit-comment",
-            :record => fill_extra_fields(event) }
+        request_queue: [],
+        emitted_records: [
+          { tag: "commit-comment",
+            record: fill_extra_fields(event) }
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @crawler.request_queue,
-                     :emitted_records => @emitted_records })
+                   { request_queue: @crawler.request_queue,
+                     emitted_records: @emitted_records })
     end
   end
 
@@ -300,15 +300,15 @@ class CrawlerTest < Test::Unit::TestCase
       event = JSON.parse(fixture_data("fork-event.json"))
       @crawler.process_user_event("user", event)
       expected = {
-        :request_queue => [],
-        :emitted_records => [
-          { :tag    => "fork",
-            :record => fill_extra_fields(event) }
+        request_queue: [],
+        emitted_records: [
+          { tag: "fork",
+            record: fill_extra_fields(event) }
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @crawler.request_queue,
-                     :emitted_records => @emitted_records })
+                   { request_queue: @crawler.request_queue,
+                     emitted_records: @emitted_records })
     end
   end
 
@@ -317,15 +317,15 @@ class CrawlerTest < Test::Unit::TestCase
       event = JSON.parse(fixture_data("pull-request-event.json"))
       @crawler.process_user_event("user", event)
       expected = {
-        :request_queue => [],
-        :emitted_records => [
-          { :tag    => "pull-request",
-            :record => fill_extra_fields(event) }
+        request_queue: [],
+        emitted_records: [
+          { tag: "pull-request",
+            record: fill_extra_fields(event) }
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @crawler.request_queue,
-                     :emitted_records => @emitted_records })
+                   { request_queue: @crawler.request_queue,
+                     emitted_records: @emitted_records })
     end
   end
 
@@ -347,17 +347,17 @@ class CrawlerTest < Test::Unit::TestCase
       expected_push = fill_extra_fields(expected_push)
 
       expected = {
-        :request_queue => [],
-        :emitted_records => [
-          { :tag    => "commit",
-            :record =>  expected_commit },
-          { :tag    => "push",
-            :record => expected_push }
+        request_queue: [],
+        emitted_records: [
+          { tag: "commit",
+            record: expected_commit },
+          { tag: "push",
+            record: expected_push }
         ],
       }
       assert_equal(expected,
-                   { :request_queue   => @crawler.request_queue,
-                     :emitted_records => @emitted_records })
+                   { request_queue: @crawler.request_queue,
+                     emitted_records: @emitted_records })
     end
   end
 end
