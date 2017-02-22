@@ -75,6 +75,7 @@ module Fluent
               pos_file: @pos_file,
               request_queue: @request_queue,
               default_interval: @interval,
+              log: log
             }
             crawler = ::Fluent::Plugin::GithubActivities::Crawler.new(crawler_options)
             crawler.on_emit = lambda do |tag, record|

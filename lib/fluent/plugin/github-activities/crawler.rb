@@ -39,7 +39,7 @@ module Fluent
         RELATED_EVENT = "$github-activities-related-event"
 
         attr_writer :on_emit
-        attr_reader :request_queue, :interval_for_next_request
+        attr_reader :request_queue, :interval_for_next_request, :log
 
         def initialize(options={})
           @users_manager = UsersManager.new(users: options[:watching_users],
@@ -55,11 +55,13 @@ module Fluent
           @request_queue = options[:request_queue] || []
 
           @default_interval = options[:default_interval] || DEFAULT_INTERVAL
+          # Fluent::PluginLogger instance
+          @log = log
         end
 
         def process_request
           request = @request_queue.shift
-          $log.debug("GithubActivities::Crawler: processing request: #{request.inspect}") if $log
+          log.debug("GithubActivities::Crawler: processing request: #{request.inspect}")
           if request[:process_after] and
             Time.now.to_i < request[:process_after]
             @request_queue.push(request)
@@ -70,18 +72,18 @@ module Fluent
           uri = request_uri(request)
           extra_headers = extra_request_headers(request)
 
-          $log.debug("GithubActivities::Crawler: requesting to #{uri.inspect}") if $log
+          log.debug("GithubActivities::Crawler: requesting to #{uri.inspect}")
           response = http_get(uri, extra_headers)
-          $log.debug("GithubActivities::Crawler: response: #{response.inspect}") if $log
+          log.debug("GithubActivities::Crawler: response: #{response.inspect}")
 
           case response
           when Net::HTTPSuccess
-            $log.trace("GithubActivities::Crawler: Net::HTTPSuccess / request type: #{request[:type]}") if $log
+            log.trace("GithubActivities::Crawler: Net::HTTPSuccess / request type: #{request[:type]}")
             body = JSON.parse(response.body)
             case request[:type]
             when TYPE_EVENTS
               events = body
-              $log.trace("GithubActivities::Crawler: events size: #{events.size}") if $log
+              log.trace("GithubActivities::Crawler: events size: #{events.size}")
               process_user_events(request[:user], events)
               reserve_user_events(request[:user], previous_response: response)
               @users_manager.save_position_for(request[:user], entity_tag: response["ETag"])
@@ -89,7 +91,7 @@ module Fluent
               process_commit(body, request[:push])
             end
           when Net::HTTPNotModified
-            $log.trace("GithubActivities::Crawler: Net::HTTPNotModified / request type: #{request[:type]}") if $log
+            log.trace("GithubActivities::Crawler: Net::HTTPNotModified / request type: #{request[:type]}")
             case request[:type]
             when TYPE_EVENTS
               reserve_user_events(request[:user],
@@ -99,7 +101,7 @@ module Fluent
             @interval_for_next_request = @default_interval
             return true
           else
-            $log.trace("GithubActivities::Crawler: UnknownType / request type: #{request[:type]}") if $log
+            log.trace("GithubActivities::Crawler: UnknownType / request type: #{request[:type]}")
             case request[:type]
             when TYPE_COMMIT
               fake_body = {
@@ -112,7 +114,7 @@ module Fluent
           @interval_for_next_request = @default_interval
           return true
         rescue StandardError => error
-          $log.error(error.inspect)
+          log.error(error.inspect)
         end
 
         def request_uri(request)
@@ -187,7 +189,7 @@ module Fluent
             emit(event["type"], event)
           end
         rescue StandardError => error
-          $log.exception(error)
+          log.fatal(error)
         end
 
         def process_push_event(event)
@@ -207,7 +209,7 @@ module Fluent
         end
 
         def process_commit(commit, push_event)
-          $log.debug("GithubActivities::Crawler: processing commit #{commit["sha"]}") if $log
+          log.debug("GithubActivities::Crawler: processing commit #{commit["sha"]}")
           user = commit["author"]["login"]
 
           if user and (@include_foreign_commits or watching_user?(user))
@@ -314,7 +316,7 @@ module Fluent
         end
 
         def emit(tag, record)
-          $log.trace("GithubActivities::Crawler: emit => #{tag}, #{record.inspect}") if $log
+          log.trace("GithubActivities::Crawler: emit => #{tag}, #{record.inspect}")
           @on_emit.call(tag, record) if @on_emit
         end
 
