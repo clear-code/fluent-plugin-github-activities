@@ -28,6 +28,8 @@ module Fluent
       DEFAULT_BASE_TAG = "github-activity"
       DEFAULT_CLIENTS = 4
 
+      helpers :thread
+
       Fluent::Plugin.register_input("github-activities", self)
 
       config_param :access_token, :string, default: nil, secret: true
@@ -47,7 +49,6 @@ module Fluent
         n_clients = [@clients, users.size].min
         @interval = @interval * n_clients
 
-        @client_threads = []
         @request_queue = Queue.new
 
         users_manager_params = {
@@ -59,8 +60,8 @@ module Fluent
           @request_queue.push(request)
         end
 
-        n_clients.times do
-          @client_threads << Thread.new do
+        n_clients.times do |n|
+          thread_create("in_github_activity_#{n}".to_sym) do
             crawler_options = {
               access_token: @access_token,
               watching_users: users,
@@ -81,10 +82,6 @@ module Fluent
             end
           end
         end
-      end
-
-      def shutdown
-        @client_threads.each(&:exit)
       end
 
       private
