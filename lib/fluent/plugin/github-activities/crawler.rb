@@ -56,7 +56,7 @@ module Fluent
 
           @default_interval = options[:default_interval] || DEFAULT_INTERVAL
           # Fluent::PluginLogger instance
-          @log = log
+          @log = options[:log]
         end
 
         def process_request
