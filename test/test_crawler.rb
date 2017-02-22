@@ -20,6 +20,7 @@
 require "json"
 
 require "fluent/plugin/github-activities"
+require "fluent/test"
 
 class CrawlerTest < Test::Unit::TestCase
   def setup
@@ -40,6 +41,7 @@ class CrawlerTest < Test::Unit::TestCase
       watching_users: [
         'piroor',
       ],
+      log: $log
     }
   end
 
