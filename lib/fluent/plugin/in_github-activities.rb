@@ -101,13 +101,7 @@ module Fluent
           end
         end
 
-        users = users.collect do |user|
-          user.strip
-        end.reject do |user|
-          user.empty?
-        end
-
-        users
+        users.collect(&:strip).reject(&:empty?)
       end
     end
   end
