@@ -19,7 +19,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = "fluent-plugin-github-activities"
-  spec.version = "0.6.0"
+  spec.version = "0.6.1"
   spec.authors = ["YUKI Hiroshi"]
   spec.email = ["yuki@clear-code.com"]
   spec.summary = "Fluentd plugin to crawl public activities on the GitHub."
