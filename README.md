@@ -1,5 +1,8 @@
 # fluent-plugin-github-activities
 
+[![Gem Version](https://badge.fury.io/rb/fluent-plugin-github-activities.svg)](https://badge.fury.io/rb/fluent-plugin-github-activities)
+[![Build Status](https://travis-ci.org/clear-code/fluent-plugin-github-activities.svg?branch=master)](https://travis-ci.org/clear-code/fluent-plugin-github-activities)
+
 Provides ability to watch public activities on GitHub.
 This crawls GitHub activities of specified users and forward each activity as a record.
 
