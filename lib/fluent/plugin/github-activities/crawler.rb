@@ -214,7 +214,7 @@ module Fluent
           if push_event["org"]
             commit[RELATED_ORGANIZATION_IMAGE_KEY] = push_event["org"]["avatar_url"]
           end
-          commit[RELATED_EVENT] = push_event
+          commit[RELATED_EVENT] = push_event.reject {|k, _| k == "payload" }
           emit("commit", commit)
         end
 
