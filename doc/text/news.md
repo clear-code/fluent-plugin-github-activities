@@ -1,5 +1,14 @@
 # News
 
+## 0.6.1: 2017-02-27
+
+  * Add missing news entries.
+
+## 0.6.0: 2017-02-27
+
+  * Introduce secret parameter.
+  * Support label feature.
+
 ## 0.5.0: 2015-06-06
 
  * Parallel crawling is land.
