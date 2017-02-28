@@ -17,10 +17,7 @@
 # License along with fluent-plugin-github-activities.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-require "pathname"
 require "json"
-
-require "fluent/plugin/github-activities/safe_file_writer"
 
 module Fluent
   module Plugin
