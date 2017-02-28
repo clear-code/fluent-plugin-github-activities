@@ -27,6 +27,7 @@ module Fluent
     class GithubActivitiesInput < Fluent::Plugin::Input
       DEFAULT_BASE_TAG = "github-activity"
       DEFAULT_CLIENTS = 4
+      DEFAULT_STORAGE_TYPE = "local"
 
       helpers :thread, :storage
 
@@ -44,8 +45,7 @@ module Fluent
 
       config_section :storage do
         config_set_default :usage, "in-github-activities"
-        config_set_default :@type, Fluent::Plugin::Storage::DEFAULT_TYPE
-        config_set_default :persistent, false
+        config_set_default :@type, DEFAULT_STORAGE_TYPE
       end
 
       def configure(conf)
@@ -60,7 +60,7 @@ module Fluent
         storage_config = storage_section.corresponding_config_element
         @pos_storage = storage_create(usage: storage_section.usage,
                                       conf: storage_config,
-                                      default_type: Fluent::Plugin::Storage::DEFAULT_TYPE)
+                                      default_type: DEFAULT_STORAGE_TYPE)
       end
 
       def start
