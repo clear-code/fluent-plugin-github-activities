@@ -27,8 +27,6 @@ module Fluent
 
         def initialize(params={})
           @users = params[:users]
-
-          @positions = {}
           @pos_storage = params[:pos_storage]
         end
 
