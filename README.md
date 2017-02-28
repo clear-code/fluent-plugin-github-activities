@@ -94,11 +94,6 @@ Then the value of the `token` field is the access key to be written to the confi
   # Number of clients. This is `4` by default.
   clients 1
 
-  # Path to a file to store timestamp of last crawled activity
-  # for each user. If you don't specify this option, same records
-  # can be forwarded after the fluentd is restarted.
-  pos_file /tmp/github-activities.json
-
   # Base tag of forwarded records. It will be used as
   # <base_tag>.<activity type>, like: "github-activity.push",
   # "github-activity.StatusEvent", etc.

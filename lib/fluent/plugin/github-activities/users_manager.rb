@@ -29,7 +29,6 @@ module Fluent
           @users = params[:users]
 
           @positions = {}
-          @pos_file = params[:pos_file]
           @pos_storage = params[:pos_storage]
         end
 
