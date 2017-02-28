@@ -28,7 +28,7 @@ module Fluent
       DEFAULT_BASE_TAG = "github-activity"
       DEFAULT_CLIENTS = 4
 
-      helpers :thread
+      helpers :thread, :storage
 
       Fluent::Plugin.register_input("github-activities", self)
 
@@ -38,9 +38,15 @@ module Fluent
       config_param :include_commits_from_pull_request, :bool, default: false
       config_param :include_foreign_commits, :bool, default: false
       config_param :base_tag, :string, default: DEFAULT_BASE_TAG
-      config_param :pos_file, :string, default: nil
+      config_param :pos_file, :string, default: nil, deprecated: "Use storage instead."
       config_param :clients, :integer, default: DEFAULT_CLIENTS
       config_param :interval, :integer, default: 1
+
+      config_section :storage do
+        config_set_default :usage, "in-github-activities"
+        config_set_default :@type, Fluent::Plugin::Storage::DEFAULT_TYPE
+        config_set_default :persistent, false
+      end
 
       def configure(conf)
         super
@@ -49,6 +55,12 @@ module Fluent
         @users += load_users_list
         @n_clients = [@clients, @users.size].min
         @interval = @interval * @n_clients
+        raise Fluent::ConfigError, "You can define <storage> section at once" unless @storage_configs.size == 1
+        storage_section = @storage_configs.first
+        storage_config = storage_section.corresponding_config_element
+        @pos_storage = storage_create(usage: storage_section.usage,
+                                      conf: storage_config,
+                                      default_type: Fluent::Plugin::Storage::DEFAULT_TYPE)
       end
 
       def start
@@ -58,7 +70,7 @@ module Fluent
 
         users_manager_params = {
           users: @users,
-          pos_file: @pos_file,
+          pos_storage: @pos_storage,
         }
         users_manager = ::Fluent::Plugin::GithubActivities::UsersManager.new(users_manager_params)
         users_manager.generate_initial_requests.each do |request|
@@ -71,7 +83,7 @@ module Fluent
               watching_users: @users,
               include_commits_from_pull_request: @include_commits_from_pull_request,
               include_foreign_commits: @include_foreign_commits,
-              pos_file: @pos_file,
+              pos_storage: @pos_storage,
               request_queue: @request_queue,
               default_interval: @interval,
               log: log

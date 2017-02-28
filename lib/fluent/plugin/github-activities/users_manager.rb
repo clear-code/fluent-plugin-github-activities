@@ -33,7 +33,7 @@ module Fluent
 
           @positions = {}
           @pos_file = params[:pos_file]
-          @pos_file = Pathname(@pos_file) if @pos_file
+          @pos_storage = params[:pos_storage]
         end
 
         def generate_initial_requests
@@ -62,42 +62,25 @@ module Fluent
         end
 
         def position_for(user)
-          load_positions
-          @positions[user]
+          @pos_storage.get(user)
         end
 
         def save_position_for(user, params)
-          load_positions
-          @positions[user] ||= {}
+          user = @pos_storage.get(user) || {}
 
           if params[:entity_tag]
-            @positions[user]["entity_tag"] = params[:entity_tag]
+            user["entity_tag"] = params[:entity_tag]
           end
 
           if params[:last_event_timestamp] and
             params[:last_event_timestamp] != DEFAULT_LAST_EVENT_TIMESTAMP
-            old_timestamp = @positions[user]["last_event_timestamp"]
+            old_timestamp = user["last_event_timestamp"]
             if old_timestamp.nil? or old_timestamp < params[:last_event_timestamp]
-              @positions[user]["last_event_timestamp"] = params[:last_event_timestamp]
+              user["last_event_timestamp"] = params[:last_event_timestamp]
             end
           end
 
-          save_positions
-        end
-
-        private
-        def load_positions
-          return unless @pos_file
-          return unless @pos_file.exist?
-
-          @positions = JSON.parse(@pos_file.read)
-        rescue
-          @positions = {}
-        end
-
-        def save_positions
-          return unless @pos_file
-          SafeFileWriter.write(@pos_file, JSON.pretty_generate(@positions))
+          @pos_storage.save
         end
       end
     end

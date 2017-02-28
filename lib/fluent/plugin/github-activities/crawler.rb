@@ -43,7 +43,7 @@ module Fluent
 
         def initialize(options={})
           @users_manager = UsersManager.new(users: options[:watching_users],
-                                            pos_file: options[:pos_file])
+                                            pos_storage: options[:pos_storage])
 
           @access_token = options[:access_token]
 

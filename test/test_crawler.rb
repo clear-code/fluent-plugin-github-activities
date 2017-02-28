@@ -23,6 +23,26 @@ require "fluent/plugin/github-activities"
 require "fluent/test"
 
 class CrawlerTest < Test::Unit::TestCase
+  class DummyStorage
+    def initialize
+      @store = {}
+    end
+
+    def get(key)
+      @store[key]
+    end
+
+    def put(key, value)
+      @store[key] = value
+    end
+
+    def save
+    end
+
+    def load
+    end
+  end
+
   def setup
     @emitted_records = []
 
@@ -41,7 +61,8 @@ class CrawlerTest < Test::Unit::TestCase
       watching_users: [
         'piroor',
       ],
-      log: $log
+      log: $log,
+      pos_storage: DummyStorage.new
     }
   end
 
