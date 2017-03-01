@@ -60,20 +60,21 @@ module Fluent
         end
 
         def save_position_for(user, params)
-          user = @pos_storage.get(user) || {}
+          position = @pos_storage.get(user) || {}
 
           if params[:entity_tag]
-            user["entity_tag"] = params[:entity_tag]
+            position["entity_tag"] = params[:entity_tag]
           end
 
           if params[:last_event_timestamp] and
             params[:last_event_timestamp] != DEFAULT_LAST_EVENT_TIMESTAMP
-            old_timestamp = user["last_event_timestamp"]
+            old_timestamp = position["last_event_timestamp"]
             if old_timestamp.nil? or old_timestamp < params[:last_event_timestamp]
-              user["last_event_timestamp"] = params[:last_event_timestamp]
+              position["last_event_timestamp"] = params[:last_event_timestamp]
             end
           end
 
+          @pos_storage.put(user, position)
           @pos_storage.save
         end
       end
