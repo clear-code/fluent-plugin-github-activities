@@ -6,6 +6,29 @@
 Provides ability to watch public activities on GitHub.
 This crawls GitHub activities of specified users and forward each activity as a record.
 
+## Requirements
+
+| fluent-plugin-github-activities | fluentd    | ruby   |
+|---------------------------------|------------|--------|
+| >= 0.7.0                        | >= v0.14.0 | >= 2.1 |
+| < 0.7.0                         | >= v0.12.0 | >= 1.9 |
+
+## Installation
+
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'fluent-plugin-github-activities'
+```
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install fluent-plugin-github-activities
+
 ## Supported activity types
 
  * Activities related to commits
@@ -118,3 +141,20 @@ Then the value of the `token` field is the access key to be written to the confi
   #include_foreign_commits true
 </source>
 ~~~
+
+### Breaking changes
+
+`pos_file` is deprecated since 0.7.0. Use storage instead as following:
+
+```
+<source>
+  @type github-activities
+  <storage>
+    @type local
+    persistent true
+    # or if you want to take over old pos_file,
+    # path parameter must be end with ".json".
+    # path /path/to/pos_file.json
+  </storage>
+</source>
+```
