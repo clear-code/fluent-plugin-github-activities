@@ -39,7 +39,7 @@ module Fluent
       config_param :include_commits_from_pull_request, :bool, default: false
       config_param :include_foreign_commits, :bool, default: false
       config_param :base_tag, :string, default: DEFAULT_BASE_TAG
-      config_param :pos_file, :string, default: nil, deprecated: "Use storage instead."
+      config_param :pos_file, :string, default: nil, obsoleted: "Use storage instead."
       config_param :clients, :integer, default: DEFAULT_CLIENTS
       config_param :interval, :integer, default: 1
 
