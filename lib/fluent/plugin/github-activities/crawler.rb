@@ -39,7 +39,7 @@ module Fluent
         RELATED_EVENT = "$github-activities-related-event"
 
         attr_writer :on_emit
-        attr_reader :request_queue, :interval_for_next_request, :log
+        attr_reader :request_queue, :interval_for_next_request, :log, :running
 
         def initialize(options={})
           @users_manager = UsersManager.new(users: options[:watching_users],
@@ -57,6 +57,7 @@ module Fluent
           @default_interval = options[:default_interval] || DEFAULT_INTERVAL
           # Fluent::PluginLogger instance
           @log = options[:log]
+          @running = true
         end
 
         def process_request
@@ -143,7 +144,7 @@ module Fluent
 
         def reserve_user_events(user, options={})
           request = @users_manager.new_events_request(user, options)
-          @request_queue.push(request)
+          @request_queue.push(request) if @running
         end
 
         def process_user_events(user, events)
@@ -193,6 +194,7 @@ module Fluent
         end
 
         def process_push_event(event)
+          return unless @running
           payload = event["payload"]
           commit_refs = payload["commits"]
           if !@include_commits_from_pull_request and
@@ -304,6 +306,10 @@ module Fluent
           when "tag"
             emit("tag", event)
           end
+        end
+
+        def stop
+          @running = false
         end
 
         private

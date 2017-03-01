@@ -67,6 +67,7 @@ module Fluent
         super
 
         @request_queue = Queue.new
+        @crawlers = []
 
         users_manager_params = {
           users: @users,
@@ -89,16 +90,27 @@ module Fluent
               log: log
             }
             crawler = ::Fluent::Plugin::GithubActivities::Crawler.new(crawler_options)
+            @crawlers << crawler
             crawler.on_emit = lambda do |tag, record|
               router.emit("#{@base_tag}.#{tag}", Engine.now, record)
             end
 
             loop do
               crawler.process_request
+              break unless crawler.running
               sleep(crawler.interval_for_next_request)
             end
           end
         end
+      end
+
+      def shutdown
+        until @request_queue.empty?
+          log.debug(queue_size: @request_queue.size)
+          sleep(@interval)
+        end
+        @crawlers.each(&:stop)
+        super
       end
 
       private
