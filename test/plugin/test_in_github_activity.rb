@@ -45,5 +45,21 @@ class TestGithubActivitiesInput < Test::Unit::TestCase
       assert_equal(expected_path, storage.path)
       assert { storage.persistent }
     end
+
+    data(single: ["piroor", ["piroor"]],
+         multiple: ["okkez,cosmo0920", ["okkez", "cosmo0920"]])
+    test "users" do |(users, expected_users)|
+      config = config_element("ROOT", "", { "users" => users })
+      d = create_driver(config)
+      plugin = d.instance
+      assert_equal(expected_users, plugin.users)
+    end
+
+    test "users_list" do
+      config = config_element("ROOT", "", { "users_list" => fixture_path("users.txt") })
+      d = create_driver(config)
+      plugin = d.instance
+      assert_equal(["okkez", "cosmo0920"], plugin.users)
+    end
   end
 end
