@@ -62,4 +62,24 @@ class TestGithubActivitiesInput < Test::Unit::TestCase
       assert_equal(["okkez", "cosmo0920"], plugin.users)
     end
   end
+
+  sub_test_case "emit" do
+    test "simple" do
+      user_events_template = Addressable::Template.new("https://api.github.com/users/{user}/events/public")
+      stub_request(:get, user_events_template)
+        .to_return(body: File.open(fixture_path("piroor-events.json")), status: 200)
+      commits_template = Addressable::Template.new("https://api.github.com/repos/{owner}/{project}/commits/{commit_hash}")
+      stub_request(:get, commits_template)
+        .to_return(body: File.open(fixture_path("commit.json")), status: 200)
+      config = config_element("ROOT", "", { "users" => "piroor", "@log_level" => "trace" })
+      d = create_driver(config)
+      d.run(timeout: 1, expect_emits: 2)
+      tag, _time, record = d.events[0]
+      assert_equal("github-activity.commit", tag)
+      assert_equal("8e90721ff5d89f52b5b3adf0b86db01f03dc5588", record["sha"])
+      tag, _time, record = d.events[1]
+      assert_equal("github-activity.push", tag)
+      assert_equal("2823041920", record["id"])
+    end
+  end
 end
