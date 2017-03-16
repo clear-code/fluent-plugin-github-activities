@@ -1,0 +1,47 @@
+[
+  {
+    "id": "2823041920",
+    "type": "PushEvent",
+    "actor": {
+      "id": 70062,
+      "login": "piroor",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/piroor",
+      "avatar_url": "https://avatars.githubusercontent.com/u/70062?"
+    },
+    "repo": {
+      "id": 35922279,
+      "name": "clear-code/fluent-plugin-github-activities",
+      "url": "https://api.github.com/repos/clear-code/fluent-plugin-github-activities"
+    },
+    "payload": {
+      "push_id": 670478406,
+      "size": 1,
+      "distinct_size": 1,
+      "ref": "refs/heads/master",
+      "head": "c908f319c7b6d5c5a69c8b675bde40dd990ee364",
+      "before": "e77acc068b5568f8ea55605db2e3a9005805c898",
+      "commits": [
+        {
+          "sha": "8e90721ff5d89f52b5b3adf0b86db01f03dc5588",
+          "author": {
+            "email": "shimoda@clear-code.com",
+            "name": "YUKI Hiroshi"
+          },
+          "message": "Add missing constant",
+          "distinct": true,
+          "url": "https://api.github.com/repos/clear-code/fluent-plugin-github-activities/commits/8e90721ff5d89f52b5b3adf0b86db01f03dc5588"
+        }
+      ]
+    },
+    "public": true,
+    "created_at": "2015-05-21T05:37:34Z",
+    "org": {
+      "id": 176515,
+      "login": "clear-code",
+      "gravatar_id": "",
+      "url": "https://api.github.com/orgs/clear-code",
+      "avatar_url": "https://avatars.githubusercontent.com/u/176515?"
+    }
+  }
+]
