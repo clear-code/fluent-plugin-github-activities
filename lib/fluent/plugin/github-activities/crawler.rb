@@ -55,6 +55,7 @@ module Fluent
           @request_queue = options[:request_queue] || []
 
           @default_interval = options[:default_interval] || DEFAULT_INTERVAL
+          @interval_for_next_request = @default_interval
           # Fluent::PluginLogger instance
           @log = options[:log]
           @running = true
