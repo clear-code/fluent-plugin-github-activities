@@ -24,6 +24,7 @@ test_dir = File.join(base_dir, "test")
 
 require "test-unit"
 require "test/unit/notify"
+require "webmock/test_unit"
 
 $LOAD_PATH.unshift(lib_dir)
 

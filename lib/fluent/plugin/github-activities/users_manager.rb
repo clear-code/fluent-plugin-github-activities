@@ -17,86 +17,66 @@
 # License along with fluent-plugin-github-activities.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-require "pathname"
 require "json"
 
-require "fluent/plugin/github-activities/safe_file_writer"
-
 module Fluent
-  module GithubActivities
-    class UsersManager
-      DEFAULT_LAST_EVENT_TIMESTAMP = -1
+  module Plugin
+    module GithubActivities
+      class UsersManager
+        DEFAULT_LAST_EVENT_TIMESTAMP = -1
 
-      def initialize(params={})
-        @users = params[:users]
-
-        @positions = {}
-        @pos_file = params[:pos_file]
-        @pos_file = Pathname(@pos_file) if @pos_file
-      end
-
-      def generate_initial_requests
-        @users.collect do |user|
-          new_events_request(user)
-        end
-      end
-
-      def new_events_request(user, options={})
-        request = {
-          type: TYPE_EVENTS,
-          user: user,
-        }
-        response = options[:previous_response]
-        if response
-          now = options[:now] || Time.now
-          interval = response["X-Poll-Interval"].to_i
-          time_to_process = now.to_i + interval
-          request[:previous_entity_tag] = response["ETag"] ||
-                                            options[:previous_entity_tag]
-          request[:process_after] = time_to_process
-        else
-          request[:previous_entity_tag] = options[:previous_entity_tag] if options.key?(:previous_entity_tag)
-        end
-        request
-      end
-
-      def position_for(user)
-        load_positions
-        @positions[user]
-      end
-
-      def save_position_for(user, params)
-        load_positions
-        @positions[user] ||= {}
-
-        if params[:entity_tag]
-          @positions[user]["entity_tag"] = params[:entity_tag]
+        def initialize(params={})
+          @users = params[:users]
+          @pos_storage = params[:pos_storage]
         end
 
-        if params[:last_event_timestamp] and
-             params[:last_event_timestamp] != DEFAULT_LAST_EVENT_TIMESTAMP
-          old_timestamp = @positions[user]["last_event_timestamp"]
-          if old_timestamp.nil? or old_timestamp < params[:last_event_timestamp]
-            @positions[user]["last_event_timestamp"] = params[:last_event_timestamp]
+        def generate_initial_requests
+          @users.collect do |user|
+            new_events_request(user)
           end
         end
 
-        save_positions
-      end
+        def new_events_request(user, options={})
+          request = {
+            type: TYPE_EVENTS,
+            user: user,
+          }
+          response = options[:previous_response]
+          if response
+            now = options[:now] || Time.now
+            interval = response["X-Poll-Interval"].to_i
+            time_to_process = now.to_i + interval
+            request[:previous_entity_tag] = response["ETag"] ||
+                                            options[:previous_entity_tag]
+            request[:process_after] = time_to_process
+          else
+            request[:previous_entity_tag] = options[:previous_entity_tag] if options.key?(:previous_entity_tag)
+          end
+          request
+        end
 
-      private
-      def load_positions
-        return unless @pos_file
-        return unless @pos_file.exist?
+        def position_for(user)
+          @pos_storage.get(user)
+        end
 
-        @positions = JSON.parse(@pos_file.read)
-      rescue
-        @positions = {}
-      end
+        def save_position_for(user, params)
+          position = @pos_storage.get(user) || {}
 
-      def save_positions
-        return unless @pos_file
-        SafeFileWriter.write(@pos_file, JSON.pretty_generate(@positions))
+          if params[:entity_tag]
+            position["entity_tag"] = params[:entity_tag]
+          end
+
+          if params[:last_event_timestamp] and
+            params[:last_event_timestamp] != DEFAULT_LAST_EVENT_TIMESTAMP
+            old_timestamp = position["last_event_timestamp"]
+            if old_timestamp.nil? or old_timestamp < params[:last_event_timestamp]
+              position["last_event_timestamp"] = params[:last_event_timestamp]
+            end
+          end
+
+          @pos_storage.put(user, position)
+          @pos_storage.save
+        end
       end
     end
   end

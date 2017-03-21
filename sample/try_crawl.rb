@@ -1,6 +1,6 @@
 require "fluent/plugin/github-activities"
 
-crawler = Fluent::GithubActivities::Crawler.new
+crawler = Fluent::Plugin::GithubActivities::Crawler.new
 crawler.on_emit = lambda do |tag, record|
   puts "EMIT: #{tag}"
 end
