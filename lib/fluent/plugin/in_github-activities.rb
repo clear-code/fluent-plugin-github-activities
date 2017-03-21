@@ -117,13 +117,10 @@ module Fluent
 
       def load_users_list
         return [] unless @users_list
-        users = []
         users_list = Pathname(@users_list)
         return [] unless users_list.exist?
-        list = users_list.read
-        users.concat(list.split("\n"))
 
-        users.collect(&:strip).reject(&:empty?)
+        users_list.readlines.collect(&:strip).reject(&:empty?)
       end
     end
   end
