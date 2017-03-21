@@ -52,7 +52,7 @@ module Fluent
         super
 
         @base_tag = @base_tag.sub(/\.\z/, "")
-        @users += load_users_list
+        @users.concat(load_users_list)
         @n_clients = [@clients, @users.size].min
         @interval = @interval * @n_clients
         raise Fluent::ConfigError, "You can define <storage> section at once" unless @storage_configs.size == 1
@@ -121,7 +121,7 @@ module Fluent
           users_list = Pathname(@users_list)
           if users_list.exist?
             list = users_list.read
-            users += list.split("\n")
+            users.concat(list.split("\n"))
           end
         end
 
