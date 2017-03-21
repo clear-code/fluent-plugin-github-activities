@@ -120,7 +120,7 @@ module Fluent
         users_list = Pathname(@users_list)
         return [] unless users_list.exist?
 
-        users_list.readlines.collect(&:strip).reject(&:empty?)
+        users_list.readlines.collect(&:strip).reject(&:empty?).grep_v(/\A#/)
       end
     end
   end

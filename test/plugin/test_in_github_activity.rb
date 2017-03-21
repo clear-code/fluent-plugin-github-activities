@@ -55,8 +55,10 @@ class TestGithubActivitiesInput < Test::Unit::TestCase
       assert_equal(expected_users, plugin.users)
     end
 
-    test "users_list" do
-      config = config_element("ROOT", "", { "users_list" => fixture_path("users.txt") })
+    data(normal: "users.txt",
+         comment: "users-comment.txt")
+    test "users_list" do |(user_list_path)|
+      config = config_element("ROOT", "", { "users_list" => fixture_path(user_list_path) })
       d = create_driver(config)
       plugin = d.instance
       assert_equal(["okkez", "cosmo0920"], plugin.users)
