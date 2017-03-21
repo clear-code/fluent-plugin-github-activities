@@ -119,10 +119,9 @@ module Fluent
         return [] unless @users_list
         users = []
         users_list = Pathname(@users_list)
-        if users_list.exist?
+        return [] unless users_list.exist?
           list = users_list.read
           users.concat(list.split("\n"))
-        end
 
         users.collect(&:strip).reject(&:empty?)
       end
