@@ -144,7 +144,7 @@ Then the value of the `token` field is the access key to be written to the confi
 
 ### Breaking changes
 
-`pos_file` is obsoleted since 0.7.0. Use storage instead as following:
+`pos_file` is obsolete since 0.7.0. Use storage instead as following:
 
 ```
 <source>
