@@ -3,7 +3,7 @@
 ## 0.7.0: 2017-03-21
 
   * Use Fluentd v0.14 API
-  * `pos_file` is obsoleted. Use storage instead.
+  * `pos_file` is obsolete. Use storage instead.
   * Wait for processing remaining requests before shutdown
 
 ## 0.6.1: 2017-02-27
