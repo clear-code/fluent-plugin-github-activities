@@ -38,7 +38,6 @@ module Fluent
         RELATED_ORGANIZATION_IMAGE_KEY = "$github-activities-related-organization-logo"
         RELATED_EVENT = "$github-activities-related-event"
 
-        attr_writer :on_emit
         attr_reader :request_queue, :interval_for_next_request, :log, :running
 
         def initialize(options={})
@@ -311,6 +310,10 @@ module Fluent
 
         def stop
           @running = false
+        end
+
+        def on_emit(&block)
+          @on_emit = block
         end
 
         private

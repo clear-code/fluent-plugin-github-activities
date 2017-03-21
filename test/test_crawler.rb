@@ -47,7 +47,7 @@ class CrawlerTest < Test::Unit::TestCase
     @emitted_records = []
 
     @crawler = ::Fluent::Plugin::GithubActivities::Crawler.new(crawler_options)
-    @crawler.on_emit = lambda do |tag, record|
+    @crawler.on_emit do |tag, record|
       @emitted_records << { tag: tag,
                             record: record }
     end

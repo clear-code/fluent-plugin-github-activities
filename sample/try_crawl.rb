@@ -1,7 +1,7 @@
 require "fluent/plugin/github-activities"
 
 crawler = Fluent::Plugin::GithubActivities::Crawler.new
-crawler.on_emit = lambda do |tag, record|
+crawler.on_emit do |tag, record|
   puts "EMIT: #{tag}"
 end
 crawler.reserve_user_events("piroor")
